@@ -4,11 +4,13 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/pavlith/template/internal/storage"
 )
 
 func TestLoadLegacyPreferences(t *testing.T) {
-	store := &storage{dir: t.TempDir()}
-	path := filepath.Join(store.dir, "preferences.json")
+	store := storage.New(t.TempDir())
+	path := filepath.Join(store.Dir(), "preferences.json")
 	for _, tc := range []struct {
 		json              string
 		explicitlyCleared bool
@@ -19,7 +21,7 @@ func TestLoadLegacyPreferences(t *testing.T) {
 		if err := os.WriteFile(path, []byte(tc.json), 0600); err != nil {
 			t.Fatal(err)
 		}
-		prefs, err := loadJSON(store, "preferences.json", defaultPreferences)
+		prefs, err := storage.Load(store, "preferences.json", defaultPreferences)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -33,12 +35,12 @@ func TestLoadLegacyPreferences(t *testing.T) {
 }
 
 func TestCorruptJSONMovedAside(t *testing.T) {
-	store := &storage{dir: t.TempDir()}
-	path := filepath.Join(store.dir, "state.json")
+	store := storage.New(t.TempDir())
+	path := filepath.Join(store.Dir(), "state.json")
 	if err := os.WriteFile(path, []byte("!"), 0600); err != nil {
 		t.Fatal(err)
 	}
-	state, err := loadJSON(store, "state.json", defaultAppState)
+	state, err := storage.Load(store, "state.json", defaultAppState)
 	if err != nil || !state.LeftSidebarVisible {
 		t.Fatalf("state %+v, error %v", state, err)
 	}

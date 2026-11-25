@@ -1,8 +1,8 @@
 # Developer documentation
 
-The desktop entry point is `main.go`. The `Desktop` service lives in
-`desktop.go` and `menus.go`, and reads the existing JSON stores through
-`storage.go`. Svelte has separate Vite entry points for the main window and
+The desktop entry point is `main.go`. The `Desktop` service facade lives in
+`desktop.go`; feature-specific methods are split across root Go files. The
+native-independent JSON store and deep-link queue live in `internal/`. Svelte has separate Vite entry points for the main window and
 Quick Pane. Production builds embed both in the Go binary.
 
 | Command | Purpose |

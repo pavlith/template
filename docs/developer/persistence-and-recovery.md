@@ -1,7 +1,8 @@
 # Persistence and Recovery
 
-`storage.go` owns JSON persistence and validation; `desktop.go` exposes the
-corresponding typed methods to the frontend.
+`internal/storage` owns JSON persistence and file helpers. Root `storage.go`
+keeps the binding models, defaults and validation. `preferences.go` and
+`diagnostics.go` expose the corresponding typed methods to the frontend.
 
 Preferences and application state are stored in preferences.json and
 state.json. Main-window geometry is stored in window.json. On Linux the

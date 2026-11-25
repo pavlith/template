@@ -5,9 +5,15 @@ Wails owns the native process and webviews; Vite builds two frontend entries.
 
 | Path | Responsibility |
 | --- | --- |
-| `main.go` | Bootstrap, main and Quick Pane windows, single instance, lifecycle |
-| `desktop.go` | Native service methods, shortcuts, updater, diagnostics |
-| `storage.go` | JSON persistence, defaults, validation, recovery |
+| `main.go` | Entrypoint, embedded metadata and bootstrap |
+| `desktop.go` | Desktop binding facade and shared native state |
+| `app.go`, `windows.go` | Application lifecycle, tray and windows |
+| `shortcuts.go`, `native.go`, `updater.go` | Native capabilities |
+| `deep_links.go` | Native deep-link delivery |
+| `preferences.go`, `storage.go` | Preference/state IPC, models and validation |
+| `diagnostics.go` | Recovery and diagnostics IPC |
+| `internal/storage/` | Native-independent JSON store and file helpers |
+| `internal/deeplink/` | Native-independent readiness queue |
 | `menus.go` | Native app and context menus |
 | `wails.yaml` | Wake build, frontend, packaging and protocol configuration |
 | `bindings/` | Generated Go–TypeScript bindings; do not edit manually |
@@ -31,6 +37,8 @@ explicit Quit ends the process. See [Error Handling](error-handling.md).
 
 ## IPC and state
 
+Keep the Desktop type and its public model types in the root package to preserve
+Wails binding identifiers. Put native-independent logic in internal packages.
 Add exported service methods to Desktop, regenerate with `pnpm bindings`,
 and use the typed adapter in frontend code. Use Svelte 5 runes and snapshot
 reactive data before persistence. Keep domain logic out of UI primitives.
