@@ -3,7 +3,7 @@ version: 3
 project:
   name: wails-app
   product_name: Wails App
-  identifier: com.tauri-app.app
+  identifier: com.pavlith.template
   version: 0.1.0
   icon: build/appicon.png
 frontend:
@@ -21,6 +21,6 @@ packages:
   dmg: {}
   nsis: {}
 protocols:
-  tauri-app:
+  wails-app:
     description: Open a Wails App link
     platforms: [darwin, windows, linux]

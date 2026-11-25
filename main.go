@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"math"
-	"net/http"
 	"os"
 	"os/exec"
 	"runtime"
@@ -29,7 +28,7 @@ var appIcon []byte
 var packageJSON []byte
 
 const appName = "Wails App"
-const deepLinkScheme = "tauri-app"
+const deepLinkScheme = "wails-app"
 
 type Desktop struct {
 	app          *application.App
@@ -71,13 +70,11 @@ func main() {
 }
 
 func (d *Desktop) run() {
-	var assets http.Handler
-	if frontendAssets != nil {
-		assets = application.AssetFileServerFS(frontendAssets)
-	}
+	// Queue command-line deep links before the frontend registers its listeners.
+	d.receiveLinks(os.Args[1:])
 	d.app = application.New(application.Options{
 		Name: appName, Description: "A Wails and Svelte desktop template", Icon: appIcon,
-		Assets:   application.AssetOptions{Handler: assets},
+		Assets:   application.AssetOptions{Handler: application.AssetFileServerFS(frontendAssets)},
 		Linux:    application.LinuxOptions{ApplicationID: appID},
 		Services: []application.Service{application.NewService(d)},
 		SingleInstance: &application.SingleInstanceOptions{
@@ -127,8 +124,7 @@ func (d *Desktop) run() {
 	tray.SetMenu(menu)
 	d.app.OnShutdown(d.saveWindowState)
 	if err := d.app.Run(); err != nil {
-		log.Print(err)
-		return
+		log.Fatal(err)
 	}
 	if d.relaunch.Load() {
 		executable, err := os.Executable()

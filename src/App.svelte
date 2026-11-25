@@ -177,16 +177,26 @@
         if (!destroyed && !getAppState().onboardingCompleted) {
           openOnboardingDialog()
         }
-        const links = await commands.mainReady()
-        for (const url of links ?? [])
-          toast.info(t('deepLink.receivedToast', { url }))
         void commands.cleanupOldRecoveryFiles()
         void checkForRecentCrash()
+      } catch (error) {
+        logger.error('Initializing application failed', error)
       } finally {
-        // Show even if an init step failed — a degraded UI beats a window
-        // that never appears.
-        appWindow.show()
-        appWindow.setFocus()
+        if (!destroyed) {
+          // Complete the readiness handshake even after a degraded boot.
+          try {
+            const links = await commands.mainReady()
+            for (const url of links ?? [])
+              toast.info(t('deepLink.receivedToast', { url }))
+          } catch (error) {
+            logger.error('Completing application startup failed', error)
+          } finally {
+            if (!destroyed) {
+              await appWindow.show()
+              await appWindow.setFocus()
+            }
+          }
+        }
       }
     })()
 

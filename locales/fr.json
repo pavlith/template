@@ -86,9 +86,9 @@
   "preferences.about.githubLink": "GitHub",
   "preferences.about.websiteLink": "Site web",
   "preferences.about.changelogLink": "Journal des modifications",
-  "preferences.about.githubUrl": "https://github.com/user/repo",
-  "preferences.about.websiteUrl": "https://example.com",
-  "preferences.about.changelogUrl": "https://github.com/user/repo/releases",
+  "preferences.about.githubUrl": "https://github.com/pavlith/template",
+  "preferences.about.websiteUrl": "https://github.com/pavlith/template",
+  "preferences.about.changelogUrl": "https://github.com/pavlith/template/releases",
   "preferences.about.licenseSection": "Licence",
   "preferences.about.licenseText": "MIT © 2026 FrostyBee",
   "preferences.about.checkForUpdates": "Rechercher des mises à jour",
@@ -197,7 +197,7 @@
 
   "deepLink.receivedToast": "Lien profond reçu : {{url}}",
 
-  "demo.notificationTitle": "Bonjour de Tauri",
+  "demo.notificationTitle": "Bonjour de Wails",
   "demo.notificationBody": "Cette notification provient de Wails.",
   "demo.notificationDenied": "L'autorisation de notification a été refusée.",
   "demo.clipboardPayload": "Copié par la démo de Wails.",
@@ -216,7 +216,7 @@
   "demo.relaunchConfirmAction": "Redémarrer",
   "demo.relaunchFailed": "Impossible de redémarrer l'application.",
 
-  "welcome.title": "Modèle Tauri + Svelte 5",
+  "welcome.title": "Modèle Wails + Svelte 5",
   "welcome.subtitle": "Chaque tuile ci-dessous documente une fonctionnalité intégrée et la déclenche. Supprimez src/lib/components/demo/ quand vous démarrez votre propre application.",
   "welcome.greetFailed": "La commande greet a échoué.",
   "welcome.toast.message": "Ceci est un toast, propulsé par svelte-sonner.",

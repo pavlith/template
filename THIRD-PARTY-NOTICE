@@ -4,7 +4,7 @@ This file covers third-party code that is *vendored into this repository* —
 copied into the source tree rather than resolved from a lockfile.
 
 It deliberately does NOT enumerate the dependency tree. This project pulls in
-roughly 580 Rust crates and a comparable npm tree, both of which change
+Go modules and npm dependencies, both of which change
 whenever you add or upgrade a dependency. See "Before you distribute" at the
 bottom for how to generate an accurate notice for your own build.
 
@@ -65,26 +65,17 @@ SOFTWARE.
 BEFORE YOU DISTRIBUTE (TEMPLATE USERS READ THIS)
 ================================================================================
 
-Shipping a Tauri app is a binary distribution. Your installers statically link
-every Rust crate in src-tauri/Cargo.lock and bundle the compiled frontend, so
-the notice requirements of those licenses apply to you, not just to this
-template. MIT and BSD require the copyright notice and permission text to
-travel with binary distributions; Apache-2.0 additionally requires that you
-carry any NOTICE file from the upstream project.
+Shipping a Wails app distributes compiled Go code and the bundled frontend.
+Review applicable licenses and include required copyright and NOTICE files.
+This file is not a complete dependency notice.
 
-Do not hand-maintain that list, and do not assume this file covers it — it
-does not. Generate it from your own lockfiles:
-
-  Rust      cargo install cargo-about
-            cargo about generate about.hbs > licenses.html
-            (run from src-tauri/)
-
+  Go        go list -m -json all
   npm       pnpm dlx license-checker-rseidelsohn --production --plainVertical
 
-Tauri itself is dual-licensed Apache-2.0 OR MIT; the wider crate ecosystem is
-predominantly the same dual license, with a handful of exceptions that the
-tooling above will surface. Review the generated output for anything copyleft
-before you ship.
+Inspect licenses in the resolved Go modules (including transitive modules)
+and the frontend dependency tree, and review any platform-specific runtime
+components distributed with your installers. Retain the original template's
+MIT license and attribution (https://github.com/frostybee/tauri-svelte-template).
 
 If you keep this file in your own project, replace this section with the notice
 you generated, and update the vendored-source section above to match whatever

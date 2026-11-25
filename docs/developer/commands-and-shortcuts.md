@@ -1,5 +1,3 @@
-> This guide refers to the earlier desktop implementation. See the [developer index](README.md) for current Wails commands and entry points.
-
 # Commands & Shortcuts
 
 ## Command registry
@@ -115,8 +113,8 @@ interface ParsedShortcut {
 | `normalizeShortcut(raw)` | `'Ctrl+Shift+K'` → `'mod+shift+k'` |
 | `parseShortcut(normalized)` | `'mod+shift+k'` → `{ key: 'k', modifiers: ['mod', 'shift'] }` |
 | `buildCombo(event)` | `KeyboardEvent` → `'mod+shift+k'` |
-| `toTauriAccelerator(normalized)` | `'mod+shift+k'` → `'CmdOrCtrl+Shift+K'` (for OS registration) |
-| `fromTauriAccelerator(accelerator)` | Inverse of the above (for display) |
+| `toNativeAccelerator(normalized)` | `'mod+shift+k'` → `'CmdOrCtrl+Shift+K'` (for OS registration) |
+| `fromNativeAccelerator(accelerator)` | Inverse of the above (for display) |
 | `isValidGlobalShortcutCombo(combo)` | Requires at least one modifier + a key |
 
 **Keydown handler:**
@@ -160,49 +158,20 @@ accelerator text is static once built.
 ### Global shortcuts
 
 Global shortcuts work even when the app is not focused. They are registered
-with the OS via `tauri-plugin-global-shortcut`.
+with the OS via the Wails GlobalShortcut manager.
 
-**Rust side** (`src-tauri/src/commands/global_shortcut.rs`):
-
-A purpose-keyed registry:
-
-```rust
-static SHORTCUTS: LazyLock<Mutex<HashMap<ShortcutPurpose, String>>>
-```
-
-`ShortcutPurpose` is a specta-typed enum (`focusMain` | `quickPane`). The
-plugin installs a single handler for all registered accelerators; it dispatches
-by comparing parsed `Shortcut` values rather than raw strings.
-
-Commands: `register_global_shortcut(purpose, accelerator)`,
-`unregister_global_shortcut(purpose)`, `is_global_shortcut_registered(purpose)`.
-
-On startup, `register_saved_shortcuts_on_startup()` reads the preferences file
-directly (before the async path is usable) and registers whatever is saved.
-
-**Frontend side** (`src/lib/components/preferences/commit-shortcut.ts`):
-
-`commitShortcut(id, next)` handles the register-then-persist sequence with
-full rollback:
-
-1. Unregister the old accelerator (if any)
-2. Register the new one — on failure, re-register the old and return an error
-3. Persist to preferences — on failure, undo the registration and return an error
-
-The `PURPOSES` table maps each `ShortcutPurposeId` to its Rust purpose and
-its preferences key.
-
-**ShortcutPicker component:**
-
-A recording-mode input in the Preferences dialog. Click to start recording,
-press a combo, the component commits it via `commitShortcut()`. Clear button
-unregisters and saves `null`. Error toasts on registration or save failure.
+**Go side** (`desktop.go`): `Desktop.RegisterGlobalShortcut` maps the
+`focusMain` and `quickPane` purposes to callbacks, normalizes accelerators,
+and registers the new binding before removing the previous one. The frontend
+preference must only be committed after successful registration. Startup
+restores the saved registrations in `main.go`. Support depends on the OS
+and compositor.
 
 ### Adding a third global shortcut
 
-1. Add a variant to `ShortcutPurpose` in `src-tauri/src/types.rs`
+1. Add a variant to `ShortcutPurpose` in `desktop.go`
 2. Add a handler arm in `global_shortcut.rs`'s dispatch function
-3. Add the preference field to `AppPreferences` (Rust + TS)
+3. Add the preference field to `AppPreferences` (Go + TS)
 4. Add an entry to the `PURPOSES` table in `commit-shortcut.ts`
 5. Add a `ShortcutPicker` in the Preferences dialog
 

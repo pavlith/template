@@ -1,5 +1,3 @@
-> This guide refers to the earlier desktop implementation. See the [developer index](README.md) for current Wails commands and entry points.
-
 # Theme System
 
 A port of sarde-studio's theme system. Any VS Code theme JSON can become a
@@ -73,15 +71,15 @@ purpose. Derived `text` / `text-muted` are floor-pushed to 4.5:1 and
   Install converts the JSON (lazy-loaded chunk) and registers it as a user
   preset. Content-identical re-installs dedupe; colliding ids get suffixed
   (`dracula-theme-2`, "Dracula Theme (2)").
-- **Import theme…** — native file picker → `read_theme_file` Rust command
+- **Import theme…** — native file picker → `Desktop.PickThemeFile` Go method
   (extension-pinned, 2 MB cap) → JSONC parse → conversion → registered *and*
   activated in the slot matching the theme's own mode.
 
 ## Persistence
 
 `preferences.json` carries `theme` (mode), `lightProfile`, `darkProfile`,
-and `importedThemes` (converted presets — never raw VS Code JSON). Rust
-validates on save (`validate_preferences` in `src-tauri/src/types.rs`); the
+and `importedThemes` (converted presets — never raw VS Code JSON). Go
+validates on save (`AppPreferences.validate` in `storage.go`); the
 frontend re-validates on load (`sanitizePreferences`), falling broken
 profiles back to the defaults and dropping broken imports.
 

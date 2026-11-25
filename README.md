@@ -1,7 +1,7 @@
 <h1 align="center">Wails Svelte Template</h1>
 
 <p align="center">
-  <a href="https://github.com/frostybee/tauri-svelte-template/actions/workflows/ci.yml"><img src="https://github.com/frostybee/tauri-svelte-template/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://github.com/pavlith/template/actions/workflows/ci.yml"><img src="https://github.com/pavlith/template/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT"></a>
   <img src="https://img.shields.io/badge/Wails-v3-24C8DB" alt="Wails v3">
   <img src="https://img.shields.io/badge/Svelte-5-FF3E00" alt="Svelte 5">
@@ -13,10 +13,10 @@
   <a href="docs/developer/README.md">Developer docs</a> ·
   <a href="#quick-start">Quick start</a> ·
   <a href="#whats-already-built">Features</a> ·
-  <a href="https://github.com/frostybee/tauri-svelte-template/releases">Releases</a>
+  <a href="https://github.com/pavlith/template/releases">Releases</a>
 </p>
 
-A "batteries-included" template for building production-ready desktop applications with **Wails v3.2.0-nightly.20261123**, **Svelte 5**, and **TypeScript**. Clone it, rename a few strings, and start building on a foundation that already handles the parts every desktop app needs.
+A "batteries-included" template for building desktop applications with **Wails v3.2.0-nightly.20261123**, **Svelte 5**, and **TypeScript**. Clone it, rename a few strings, and start building on a foundation that already handles the parts every desktop app needs.
 
 <p align="center">
   <img src="docs/demo.gif" alt="Demo of the template's features: command palette, theme switching, Quick Pane, preferences, and more" width="860">
@@ -28,7 +28,7 @@ Most desktop starters give you a blank canvas. This template gives you a **worki
 
 - **Type-safe Go–TypeScript bridge** with generated Wails bindings
 - **Performance patterns enforced by tooling** including ast-grep rules for Svelte 5 IPC footguns
-- **Multi-window architecture** already working (Quick Pane with global shortcut as a demo)
+- **Multi-window architecture** (Quick Pane with global shortcut as a demo)
 - **Cross-platform ready** with platform-specific titlebars, window controls, and native menu integration
 - **i18n built-in** with RTL support, reactive translations, and menus that rebuild on language change
 - **VS Code theme support** with an OKLCH derivation engine that turns any VS Code theme JSON into a full app theme
@@ -126,6 +126,10 @@ See [USING_THIS_TEMPLATE.md](USING_THIS_TEMPLATE.md) for the full onboarding gui
 
 - **[Using This Template](USING_THIS_TEMPLATE.md)** for setup, renaming, and customization
 - **[Developer Docs](docs/developer/README.md)** for architecture, patterns, and detailed subsystem guides
+
+## Upstream attribution
+
+This project is a Go/Wails port of [frostybee/tauri-svelte-template](https://github.com/frostybee/tauri-svelte-template). Original copyright and license notices are retained. The demo images predate the migration.
 
 ## License
 

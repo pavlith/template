@@ -98,7 +98,7 @@ func (d *Desktop) receiveLinks(args []string) {
 	links := []string{}
 	for _, arg := range args {
 		u, err := url.Parse(arg)
-		if err == nil && strings.EqualFold(u.Scheme, deepLinkScheme) {
+		if err == nil && strings.EqualFold(u.Scheme, deepLinkScheme) && !slices.Contains(links, arg) {
 			links = append(links, arg)
 		}
 	}

@@ -86,9 +86,9 @@
   "preferences.about.githubLink": "GitHub",
   "preferences.about.websiteLink": "Website",
   "preferences.about.changelogLink": "Changelog",
-  "preferences.about.githubUrl": "https://github.com/user/repo",
-  "preferences.about.websiteUrl": "https://example.com",
-  "preferences.about.changelogUrl": "https://github.com/user/repo/releases",
+  "preferences.about.githubUrl": "https://github.com/pavlith/template",
+  "preferences.about.websiteUrl": "https://github.com/pavlith/template",
+  "preferences.about.changelogUrl": "https://github.com/pavlith/template/releases",
   "preferences.about.licenseSection": "License",
   "preferences.about.licenseText": "MIT © 2026 FrostyBee",
   "preferences.about.checkForUpdates": "Check for updates",
@@ -197,7 +197,7 @@
 
   "deepLink.receivedToast": "Deep link received: {{url}}",
 
-  "demo.notificationTitle": "Hello from Tauri",
+  "demo.notificationTitle": "Hello from Wails",
   "demo.notificationBody": "This notification came from Wails.",
   "demo.notificationDenied": "Notification permission was denied.",
   "demo.clipboardPayload": "Copied by the Wails demo.",
@@ -216,7 +216,7 @@
   "demo.relaunchConfirmAction": "Restart",
   "demo.relaunchFailed": "Couldn't restart the app.",
 
-  "welcome.title": "Tauri + Svelte 5 Template",
+  "welcome.title": "Wails + Svelte 5 Template",
   "welcome.subtitle": "Every tile below both documents a built-in feature and triggers it. Delete src/lib/components/demo/ when you start your own app.",
   "welcome.greetFailed": "The greet command failed.",
   "welcome.toast.message": "That's a toast, powered by svelte-sonner.",

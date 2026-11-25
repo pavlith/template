@@ -12,8 +12,8 @@ Quick Pane. Production builds embed both in the Go binary.
 | `pnpm check:all` | Run frontend and Go quality checks |
 | `pnpm desktop:build` | Build the production desktop binary |
 
-See the [release guide](releases.md) for packaging. The design notes below
-describe the original template and may reference the previous desktop APIs.
+See the [release guide](releases.md) for packaging. The guides below describe the Wails implementation. Platform-dependent
+behavior still needs validation on the corresponding operating system.
 
 | Guide | Topics |
 | --- | --- |
@@ -23,9 +23,9 @@ describe the original template and may reference the previous desktop APIs.
 | [Commands & Shortcuts](commands-and-shortcuts.md) | Command registry, palette, keyboard shortcuts, global shortcuts, menus |
 | [Theme System](theme-system.md) | Light/dark/system modes, flash-free boot, cross-window sync |
 | [Internationalisation](i18n.md) | i18next setup, locale management, RTL support, adding languages |
-| [Cross-Platform](cross-platform.md) | Platform detection, titlebar variants, context menus, capabilities |
+| [Cross-Platform](cross-platform.md) | Platform detection, titlebar variants, context menus, deep links |
 | [Quick Panes](quick-panes.md) | Multi-window architecture, Vite dual-entry, cross-window events |
 | [Error Handling](error-handling.md) | Error boundary, logging, crash reporting, diagnostics, quit confirmation, two-phase close |
-| [Quality](quality.md) | Vitest, cargo test, ast-grep, knip, jscpd, check:all pipeline |
-| [External APIs](external-apis.md) | Rust reqwest vs frontend fetch, auth token storage, offline caching |
-| [Bundle Optimisation](bundle-optimization.md) | Release profile, unused command stripping, tree-shaking, plugin removal |
+| [Quality](quality.md) | Vitest, Go tests, ast-grep, knip, jscpd, check:all pipeline |
+| [External APIs](external-apis.md) | Go net/http vs frontend fetch, auth token storage, offline caching |
+| [Bundle Optimisation](bundle-optimization.md) | Production embedding, tree-shaking, dependency review |

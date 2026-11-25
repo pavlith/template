@@ -19,8 +19,12 @@ listens on `127.0.0.1:1420`.
 | Display strings | `locales/` |
 | App and tray icon | `build/appicon.png` |
 
-Keep `com.tauri-app.app` and `tauri-app://` when upgrading existing installations.
-Preferences and application state retain their existing JSON fields.
+The default identifier is `com.pavlith.template` and the protocol is
+`wails-app://`. Choose unique values for your own application. This migration
+changes the data directory and protocol from the previous template: existing
+installations are not migrated automatically. If needed, copy your old
+preferences and state JSON files into the new data directory while the app is
+closed. The JSON field names remain compatible.
 
 Add Go methods to the `Desktop` service and regenerate TypeScript with
 `pnpm bindings`. The Svelte components use `src/lib/wails-bindings.ts`.

@@ -1,147 +1,33 @@
-> This guide refers to the earlier desktop implementation. See the [developer index](README.md) for current Wails commands and entry points.
+# Cross-platform desktop integration
 
-# Cross-Platform
+Platform detection is in `src/lib/hooks/use-platform.svelte.ts`. The
+platform-specific titlebars live in `src/lib/components/layout/`.
+Linux uses native window decorations; Windows and macOS use platform-specific
+custom titlebar variants. Window options are set in `main.go`.
 
-## Platform detection
+## Native operations
 
-`@tauri-apps/plugin-os` provides runtime platform info. The template wraps it
-in `src/lib/hooks/use-platform.svelte.ts`:
+Use `src/lib/native-window.ts` for window operations and event subscriptions,
+and `src/lib/wails-bindings.ts` for Go service methods. Menus are built in
+`menus.go`; the native application menu is installed on macOS. Global
+shortcuts, notifications and autostart use Wails facilities. Platform support
+must be checked at runtime; in particular Wayland may limit shortcuts and
+window positioning. Do not expose unrestricted filesystem/shell operations
+through bindings.
 
-```ts
-type AppPlatform = 'macos' | 'windows' | 'linux'
+## Deep links and tray
 
-function getPlatform(): AppPlatform
-```
+`wails-app://` is declared in `wails.yaml` for packaged installations.
+`main.go` accepts startup arguments, Wails URL-launch events and
+second-instance arguments; queued URLs are returned by MainReady.
+Only the configured scheme is accepted. On macOS, test second-instance URL
+launch separately; OS launch-event delivery is not equivalent to argv.
 
-The result is cached after the first call. On failure (e.g. in tests without a
-Tauri runtime), it defaults to `'macos'`.
+The tray Show action restores the main window and Quit uses the frontend
+confirmation and persistence path. The Quick Pane has a separate webview.
 
-## Platform display strings (`src/lib/platform-strings.ts`)
+## Validation
 
-A `PlatformStrings` interface provides platform-aware labels:
-
-| Field | macOS | Windows | Linux |
-| --- | --- | --- | --- |
-| `revealInFileManager` | Reveal in Finder | Show in Explorer | Show in Files |
-| `fileManagerName` | Finder | Explorer | Files |
-| `modifierKey` | Command | Ctrl | Ctrl |
-| `modifierSymbol` | ⌘ | Ctrl | Ctrl |
-| `optionKey` | Option | Alt | Alt |
-| `optionSymbol` | ⌥ | Alt | Alt |
-| `preferencesLabel` | Settings… | Settings | Preferences |
-| `quitLabel` | Quit | Exit | Quit |
-| `trashName` | Trash | Recycle Bin | Trash |
-
-`getPlatformStrings(platform)` returns the appropriate table.
-
-### `formatShortcut(platform, key, modifiers)`
-
-Formats a shortcut for display:
-
-- macOS: symbols, no separators — `⇧⌘K`
-- Windows/Linux: labels with `+` — `Ctrl+Shift+K`
-
-Mac uses a specific modifier order (⌥ ⇧ ⌘) matching Apple's convention.
-
-## Titlebar
-
-`src/lib/components/layout/TitleBar.svelte` acts as a platform router:
-
-- **macOS**: native traffic-light controls (left side), title centred
-- **Windows**: custom control icons (minimise, maximise/restore, close) on the
-  right, title left-aligned
-- **Linux**: native decorations (`decorations: true` in platform config)
-
-A `forcePlatform` dev prop overrides detection for local testing of other
-platforms' variants.
-
-## Platform-specific Tauri configs
-
-`tauri.conf.json` is the base. Platform overrides use JSON merge patch:
-
-- `tauri.macos.conf.json` — decorations on, traffic-light position
-- `tauri.windows.conf.json` — decorations off (custom titlebar)
-- `tauri.linux.conf.json` — decorations on (native)
-
-JSON merge patch replaces arrays wholesale, so any override that touches an
-array must include the complete array.
-
-## Per-window capabilities
-
-Capabilities are split by window label:
-
-| File | Window | Grants |
-| --- | --- | --- |
-| `capabilities/default.json` | `main` | Full core + all plugin permissions |
-| `capabilities/desktop.json` | `main` | `window-state:default`, `updater:default` |
-| `capabilities/quick-pane.json` | `quick-pane` | Minimal: `core:default`, a few `core:window` permissions, `core:event` |
-
-App-defined Rust commands are **not** capability-gated — only core and plugin
-commands are. This is why the global-shortcut plugin needs no capability entry.
-
-## Context menus (`src/lib/context-menu.ts`)
-
-Native right-click menus via Tauri's `Menu`/`MenuItem`/`PredefinedMenuItem`:
-
-| Function | Items |
-| --- | --- |
-| `showContextMenu(entries)` | Build an arbitrary menu from a declarative list |
-| `showEditContextMenu()` | Cut, Copy, Paste, Select All |
-| `showTextInputContextMenu()` | Undo, Redo, Cut, Copy, Paste, Select All |
-
-`showTextInputContextMenu()` is wired to text inputs via a Svelte action. The
-predefined items use OS-native labels — no i18n needed for them.
-
-Types: `ContextMenuItem`, `ContextMenuSeparator`, `ContextMenuEntry`, with an
-`isSeparator()` type guard.
-
-## Deep linking (`tauri-app://` scheme)
-
-The custom URL scheme is declared in `tauri.conf.json`
-(`plugins.deep-link.desktop.schemes`) and mirrored as `DEEP_LINK_SCHEME` in
-`src/lib/deep-link.ts`; the `/setup` skill renames both. Delivery differs by
-platform:
-
-- **Windows/Linux**: opening a scheme URL launches a second instance with the
-  URL in argv. The single-instance plugin (registered first, built with its
-  `deep-link` feature) forwards those args to the deep-link plugin before its
-  own focus-the-window callback runs.
-- **macOS**: the OS delivers the URL to the running app directly; schemes are
-  registered from the bundle's Info.plist, so deep links only work in a built
-  app, not `pnpm tauri dev`.
-
-Both paths converge on the `on_open_url` handler in `lib.rs`, which emits
-`app:deep-link-received` to the frontend — URL routing stays a frontend
-concern. The demo listener in `App.svelte` shows a toast and focuses the
-window; replace it with real routing when the app has destinations.
-
-Dev builds on Windows/Linux self-register the scheme at startup
-(`registerDeepLinkSchemeInDev()` in `src/lib/deep-link.ts`), because only
-installers perform the registration otherwise.
-
-## Tray icon (`src-tauri/src/tray.rs`)
-
-A minimal tray icon, built entirely in Rust (no JS IPC, so no capability
-entries). Left-click shows/focuses the main window; the menu offers Show and
-Quit. Quit emits `tray:quit-requested`, which `App.svelte` routes through the
-store-flushing quit path — see the two-phase close in `error-handling.md`.
-
-The menu is OS-native, so its labels are static English (webview translations
-don't reach native menus). On macOS `icon_as_template(true)` turns the colored
-default icon into an auto-tinted silhouette; shipping apps should provide a
-dedicated monochrome tray asset.
-
-## Square corners
-
-On macOS the OS rounds window corners. On Windows and Linux, fullscreen
-windows should have square corners.
-
-`src/lib/stores/square-corners.svelte.ts` exports `initSquareCorners()`:
-
-- On macOS: no-op (OS handles it)
-- On Windows/Linux: listens to `getCurrentWindow().onResized()`, checks
-  `isFullscreen()`, and calls `setSquareCorners(true/false)`
-
-`App.svelte` applies `.square-corners` to `<html>` via an `$effect`. The CSS
-variable `--app-corner-radius` is `12px` by default and `0px` under
-`.square-corners`. Layout components use `rounded-[var(--app-corner-radius)]`.
+Test native titlebars, focus, minimize/maximize, close/quit, tray, shortcuts,
+dialogs, notifications, autostart and deep links on each target OS. Linux is
+the first validation target; Windows and macOS remain build targets.

@@ -2,7 +2,10 @@
 
 package main
 
-import "io/fs"
+import (
+	"io/fs"
+	"os"
+)
 
-// Wails serves the Vite dev server in development mode.
-var frontendAssets fs.FS
+// Wails proxies the Vite server in development; dist is the local fallback.
+var frontendAssets fs.FS = os.DirFS("dist")

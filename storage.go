@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	appID                    = "com.tauri-app.app"
+	appID                    = "com.pavlith.template"
 	defaultQuickPaneShortcut = "CmdOrCtrl+Shift+."
 	maxRecentItems           = 20
 	maxThemeBytes            = 2 << 20
@@ -136,7 +136,7 @@ func (p AppPreferences) validate() error {
 	return nil
 }
 
-// Keep the existing application data directory and JSON keys when upgrading.
+// Use the template application ID and keep the persisted JSON schema stable.
 func dataDirectory() (string, error) {
 	var dir string
 	var err error

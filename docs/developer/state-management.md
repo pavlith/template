@@ -1,5 +1,3 @@
-> This guide refers to the earlier desktop implementation. See the [developer index](README.md) for current Wails commands and entry points.
-
 # State Management
 
 ## Stores
@@ -10,7 +8,7 @@ and a `__reset*ForTests()` for Vitest.
 
 ### Preferences (`preferences.svelte.ts`)
 
-User settings persisted to `preferences.json` via the Rust `json_store`.
+User settings persisted to `preferences.json` via the Go `storage.go`.
 
 | Field | Type | Default |
 | --- | --- | --- |
@@ -60,7 +58,7 @@ A non-persisted boolean that tracks whether the app has unsaved changes. Resets
 each launch.
 
 - `getHasUnsavedChanges()` — read the flag
-- `setHasUnsavedChanges(value)` — update + mirror to Rust (`AppState.has_unsaved_changes`)
+- `setHasUnsavedChanges(value)` — update the frontend dirty flag
 
 The flag gates all quit paths via `confirmQuitIfDirty()` in `lifecycle.ts`,
 which shows the in-app confirmation dialog when dirty. See
@@ -78,7 +76,7 @@ Each persisted store has a companion schema file:
 - `app-state-schema.ts` — `defaultAppState()`, `sanitizeAppState(raw)`
 
 `sanitize*()` does per-field type checking with fallback to defaults. This
-protects against corrupt or hand-edited JSON files. The Rust side also carries
+protects against corrupt or hand-edited JSON files. The Go side also carries
 matching defaults via `#[serde(default)]` on the structs in `types.rs`.
 
 ## Debounced persistence
@@ -99,7 +97,7 @@ in-flight save is awaited rather than duplicated.
 ## `$state.snapshot()` before IPC
 
 Svelte 5 wraps `$state` values in reactive proxies. These proxies do not
-serialise over Tauri's IPC bridge — `invoke()` silently sends `{}` instead of
+serialise reliably over IPC; snapshot the proxy to obtain
 the actual data. Every call that sends reactive state must wrap it:
 
 ```ts
@@ -121,7 +119,7 @@ export function flushAllStores(): Promise<void> {
 
 Both exit paths use it, after the unsaved-changes gate:
 
-1. **Close handshake** — Rust prevents the window close, emits
+1. **Close handshake** — Go cancels the window close, emits
    `app:close-requested`; `App.svelte` calls `confirmQuitIfDirty()`, then
    `flushAllStores()`, then confirms
 2. **Quit command** — `requestQuit()` in `lifecycle.ts` checks
@@ -132,8 +130,8 @@ Adding a new persisted store: export a `flush()`, call it from
 
 ## Adding a new persisted field
 
-1. Add the field to the Rust struct in `src-tauri/src/types.rs` (with
+1. Add the field to the Go struct in `storage.go` (with
    `#[serde(default)]` so existing files still parse)
-2. Regenerate bindings: `pnpm run rust:bindings`
+2. Regenerate bindings: `pnpm bindings`
 3. Add the field to the TS schema's `default*()` and `sanitize*()` functions
 4. Use it through the store's getter/setter
