@@ -12,6 +12,8 @@
   // app consumes, by design, so every unread primitive would be a finding.
   "ignore": ["src/lib/components/ui/**"],
 
+  "ignoreBinaries": ["go", "gofmt"],
+
   "ignoreDependencies": [
     // Imported from src/app.css, which knip does not parse.
     "tw-animate-css",

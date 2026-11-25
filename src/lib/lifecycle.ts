@@ -1,4 +1,4 @@
-import { commands } from '$lib/tauri-bindings'
+import { commands } from '$lib/wails-bindings'
 import { persistPreferencesNow } from '$lib/stores/preferences.svelte'
 import { persistAppStateNow } from '$lib/stores/app-state.svelte'
 import { confirm } from '$lib/stores/confirm.svelte'

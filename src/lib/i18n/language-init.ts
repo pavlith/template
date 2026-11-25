@@ -1,4 +1,3 @@
-import { locale } from '@tauri-apps/plugin-os'
 import i18n, { availableLanguages } from './config'
 
 export async function initializeLanguage(
@@ -14,7 +13,7 @@ export async function initializeLanguage(
       return
     }
 
-    const systemLocale = await locale()
+    const systemLocale = navigator.language
 
     if (systemLocale) {
       const parts = systemLocale.split('-')

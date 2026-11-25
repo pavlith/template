@@ -11,24 +11,15 @@ concurrency:
 
 jobs:
   frontend:
-    name: Frontend
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-
-      # No `version` input on purpose: the action reads `packageManager` from
-      # package.json, so CI and contributors resolve the same pnpm.
       - uses: pnpm/action-setup@v6
-
       - uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: pnpm
-
       - run: pnpm install --frozen-lockfile
-
-      # Same order as `pnpm check:all`: cheapest gates first, so a formatting
-      # slip fails in seconds rather than after the test run.
       - run: pnpm format:check
       - run: pnpm lint
       - run: pnpm check
@@ -36,48 +27,27 @@ jobs:
       - run: pnpm knip
       - run: pnpm jscpd
       - run: pnpm test:run
+      - run: pnpm build
 
-  rust:
-    name: Rust (${{ matrix.os }})
+  backend:
+    name: Go (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        # Windows is here deliberately. The comctl32 delay-load in build.rs
-        # exists only because cargo test binaries get no application manifest
-        # and die with STATUS_ENTRYPOINT_NOT_FOUND without it — a regression
-        # that is completely invisible on Linux.
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-24.04, windows-latest, macos-latest]
     steps:
       - uses: actions/checkout@v7
-
-      - name: Install Tauri system dependencies
-        if: matrix.os == 'ubuntu-latest'
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+      - name: Install Wails system dependencies
+        if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y \
-            libwebkit2gtk-4.1-dev \
-            libappindicator3-dev \
-            librsvg2-dev \
-            patchelf \
-            libgtk-3-dev
-
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          components: rustfmt, clippy
-
-      - uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: src-tauri
-
-      - name: cargo fmt
-        working-directory: src-tauri
-        run: cargo fmt --all -- --check
-
-      - name: cargo clippy
-        working-directory: src-tauri
-        run: cargo clippy --all-targets --all-features -- -D warnings
-
-      - name: cargo test
-        working-directory: src-tauri
-        run: cargo test
+          sudo apt-get install -y libgtk-4-dev libwebkitgtk-6.0-dev libx11-dev
+      - run: go vet ./...
+      - run: go test ./...
+      - name: Check Go formatting
+        if: runner.os == 'Linux'
+        run: test -z "$(gofmt -l .)"

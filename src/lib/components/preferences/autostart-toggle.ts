@@ -1,4 +1,4 @@
-import { enable, disable, isEnabled } from '@tauri-apps/plugin-autostart'
+import { commands } from '$lib/wails-bindings'
 import { logger } from '$lib/logger'
 
 export type AutostartToggleResult =
@@ -19,9 +19,9 @@ export async function commitAutostart(
 ): Promise<AutostartToggleResult> {
   try {
     if (enabled) {
-      await enable()
+      await commands.enableAutostart()
     } else {
-      await disable()
+      await commands.disableAutostart()
     }
     return { ok: true }
   } catch (e) {
@@ -32,7 +32,7 @@ export async function commitAutostart(
 /** Current OS registration; `false` when the plugin call fails (safe default). */
 export async function readAutostartState(): Promise<boolean> {
   try {
-    return await isEnabled()
+    return await commands.isAutostartEnabled()
   } catch (e) {
     logger.warn('Could not read the autostart state', e)
     return false

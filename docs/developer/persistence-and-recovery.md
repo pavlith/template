@@ -1,3 +1,5 @@
+> This guide refers to the earlier desktop implementation. See the [developer index](README.md) for current Wails commands and entry points.
+
 # Persistence & Recovery
 
 ## JSON store (`src-tauri/src/commands/json_store.rs`)

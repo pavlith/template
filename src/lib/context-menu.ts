@@ -1,4 +1,5 @@
-import { Menu, MenuItem, PredefinedMenuItem } from '@tauri-apps/api/menu'
+import { Events } from '@wailsio/runtime'
+import { commands } from '$lib/wails-bindings'
 import i18n from '$lib/i18n/config'
 
 export interface ContextMenuItem {
@@ -49,26 +50,48 @@ export function toMenuItemOptions(
   })
 }
 
-function isSeparatorOption(opt: MenuEntryOption): opt is SeparatorOption {
-  return 'item' in opt
-}
+let request = 0
+let stopListening: (() => void) | undefined
 
-async function buildAndShowMenu(options: MenuEntryOption[]): Promise<void> {
-  const items = await Promise.all(
-    options.map((opt) => {
-      if (isSeparatorOption(opt)) {
-        return PredefinedMenuItem.new({ item: 'Separator' })
-      }
-      return MenuItem.new({
-        id: opt.id,
-        text: opt.text,
-        enabled: opt.enabled,
-        action: opt.action,
-      })
-    }),
+async function buildAndShowMenu(
+  options: MenuEntryOption[],
+  point: Pick<MouseEvent, 'clientX' | 'clientY'>,
+): Promise<void> {
+  const id = ++request
+  stopListening?.()
+  stopListening = Events.On('app:context-selection', ({ data }) => {
+    const selection = data as { request: number; id: string }
+    if (selection.request !== id) return
+    stopListening?.()
+    stopListening = undefined
+    const item = options.find(
+      (option): option is MenuItemOption =>
+        'id' in option && option.id === selection.id,
+    )
+    item?.action()
+  })
+  await commands.showContextMenu(
+    id,
+    point.clientX,
+    point.clientY,
+    options.map((item) =>
+      'item' in item
+        ? {
+            id: '',
+            label: '',
+            role: item.item,
+            disabled: false,
+            accelerator: '',
+          }
+        : {
+            id: item.id,
+            label: item.text,
+            role: '',
+            disabled: !item.enabled,
+            accelerator: '',
+          },
+    ),
   )
-  const menu = await Menu.new({ items })
-  await menu.popup()
 }
 
 /**
@@ -89,12 +112,20 @@ const TEXT_INPUT_ITEMS = ['Undo', 'Redo', 'Separator', ...EDIT_ITEMS] as const
 
 async function popupPredefinedMenu(
   kinds: readonly (PredefinedItem | 'Separator')[],
+  point: Pick<MouseEvent, 'clientX' | 'clientY'>,
 ): Promise<void> {
-  const items = await Promise.all(
-    kinds.map((item) => PredefinedMenuItem.new({ item })),
+  await commands.showContextMenu(
+    0,
+    point.clientX,
+    point.clientY,
+    kinds.map((role) => ({
+      id: '',
+      label: '',
+      role,
+      disabled: false,
+      accelerator: '',
+    })),
   )
-  const menu = await Menu.new({ items })
-  await menu.popup()
 }
 
 /**
@@ -106,9 +137,10 @@ async function popupPredefinedMenu(
  */
 export async function showContextMenu(
   entries: ContextMenuEntry[],
+  point: Pick<MouseEvent, 'clientX' | 'clientY'>,
 ): Promise<void> {
   const options = toMenuItemOptions(entries)
-  await buildAndShowMenu(options)
+  await buildAndShowMenu(options, point)
 }
 
 /**
@@ -117,8 +149,10 @@ export async function showContextMenu(
  * @public For read-only surfaces where undo history is meaningless. Text
  * inputs should use `showTextInputContextMenu()` instead.
  */
-export async function showEditContextMenu(): Promise<void> {
-  await popupPredefinedMenu(EDIT_ITEMS)
+export async function showEditContextMenu(
+  point: Pick<MouseEvent, 'clientX' | 'clientY'>,
+): Promise<void> {
+  await popupPredefinedMenu(EDIT_ITEMS, point)
 }
 
 /**
@@ -127,6 +161,8 @@ export async function showEditContextMenu(): Promise<void> {
  * Applied to plain inputs through the `textInputContextMenu` action in
  * `$lib/actions/context-menu-actions`.
  */
-export async function showTextInputContextMenu(): Promise<void> {
-  await popupPredefinedMenu(TEXT_INPUT_ITEMS)
+export async function showTextInputContextMenu(
+  point: Pick<MouseEvent, 'clientX' | 'clientY'>,
+): Promise<void> {
+  await popupPredefinedMenu(TEXT_INPUT_ITEMS, point)
 }

@@ -1,5 +1,5 @@
-import { commands, unwrapResult } from '$lib/tauri-bindings'
-import type { PersistedAppState } from '$lib/tauri-bindings'
+import { commands, unwrapResult } from '$lib/wails-bindings'
+import type { PersistedAppState } from '$lib/wails-bindings'
 import { createDebouncedPersist } from '$lib/utils/debounce-persist'
 import { warn } from '$lib/logger'
 import {

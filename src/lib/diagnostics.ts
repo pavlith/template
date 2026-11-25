@@ -1,4 +1,4 @@
-import type { DiagnosticsReport } from '$lib/tauri-bindings'
+import type { DiagnosticsReport } from '$lib/wails-bindings'
 
 export function formatDiagnostics(report: DiagnosticsReport): string {
   const lines = [
@@ -7,7 +7,7 @@ export function formatDiagnostics(report: DiagnosticsReport): string {
     `App: ${report.appName} ${report.appVersion}`,
     `OS: ${report.osName} ${report.osArch}`,
     `OS Version: ${report.osVersion}`,
-    `Tauri: ${report.tauriVersion}`,
+    `Wails: ${report.wailsVersion}`,
   ]
 
   if (report.uptimeSecs != null) {
@@ -24,8 +24,9 @@ export function formatDiagnostics(report: DiagnosticsReport): string {
 
   lines.push('', '--- Settings ---', JSON.stringify(report.settings, null, 2))
 
-  if (report.recentCrashReports.length > 0) {
-    lines.push('', '--- Recent Crash Reports ---', ...report.recentCrashReports)
+  const reports = report.recentCrashReports ?? []
+  if (reports.length > 0) {
+    lines.push('', '--- Recent Crash Reports ---', ...reports)
   }
 
   return lines.join('\n')

@@ -4,8 +4,6 @@ import tailwindcss from '@tailwindcss/vite'
 import path from 'path'
 import packageJson from './package.json'
 
-const host = process.env.TAURI_DEV_HOST
-
 export default defineConfig(async () => ({
   define: {
     __APP_VERSION__: JSON.stringify(packageJson.version),
@@ -29,18 +27,8 @@ export default defineConfig(async () => ({
   },
   clearScreen: false,
   server: {
-    port: 1420,
+    port: Number(process.env.WAILS_VITE_PORT ?? 1420),
     strictPort: true,
-    host: host || false,
-    hmr: host
-      ? {
-          protocol: 'ws',
-          host,
-          port: 1421,
-        }
-      : undefined,
-    watch: {
-      ignored: ['**/src-tauri/**'],
-    },
+    host: '127.0.0.1',
   },
 }))

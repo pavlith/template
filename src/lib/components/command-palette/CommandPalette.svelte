@@ -48,7 +48,7 @@
 
   function handleInputContextMenu(e: MouseEvent): void {
     e.preventDefault()
-    void showTextInputContextMenu()
+    void showTextInputContextMenu(e)
   }
 </script>
 

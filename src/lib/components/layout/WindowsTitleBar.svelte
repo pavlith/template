@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Snippet } from 'svelte'
-  import { getCurrentWindow } from '@tauri-apps/api/window'
+  import { currentWindow } from '$lib/native-window'
   import { cn } from '$lib/utils'
   import TitleBarShell from './TitleBarShell.svelte'
 
@@ -14,7 +14,7 @@
     rightActions?: Snippet
   } = $props()
 
-  const appWindow = getCurrentWindow()
+  const appWindow = currentWindow
   let isMaximized = $state(false)
 
   $effect(() => {
@@ -36,17 +36,14 @@
 
 <TitleBarShell {title}>
   <!--
-    `data-tauri-drag-region="false"` + `self-stretch` on both clusters: the
+    `data-window-drag="false"` + `self-stretch` on both clusters: the
     buttons are shorter than the bar, so without this the sliver of bar above
     and below them is a live drag region — a fast second click that drifts a
     few pixels off a button counts as a titlebar double-click and maximizes
     the window.
   -->
   {#snippet leading()}
-    <div
-      data-tauri-drag-region="false"
-      class="flex items-center self-stretch pl-2"
-    >
+    <div data-window-drag="false" class="flex items-center self-stretch pl-2">
       {#if leftActions}
         {@render leftActions()}
       {/if}
@@ -54,7 +51,7 @@
   {/snippet}
 
   {#snippet trailing()}
-    <div data-tauri-drag-region="false" class="flex items-center self-stretch">
+    <div data-window-drag="false" class="flex items-center self-stretch">
       {#if rightActions}
         {@render rightActions()}
       {/if}

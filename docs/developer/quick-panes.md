@@ -1,3 +1,5 @@
+> This guide refers to the earlier desktop implementation. See the [developer index](README.md) for current Wails commands and entry points.
+
 # Quick Panes
 
 The Quick Pane is a small always-on-top window opened by a global shortcut —

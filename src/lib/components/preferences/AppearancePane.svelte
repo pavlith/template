@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { open as openFileDialog } from '@tauri-apps/plugin-dialog'
   import Trash2Icon from '@lucide/svelte/icons/trash-2'
   import RotateCcwIcon from '@lucide/svelte/icons/rotate-ccw'
   import DownloadIcon from '@lucide/svelte/icons/download'
@@ -27,7 +26,6 @@
     setPointerCursors,
     setWindowEffects,
   } from '$lib/stores/theme.svelte'
-  import { applyWindowEffects } from '$lib/theme/window-effects'
   import { getPlatform } from '$lib/hooks/use-platform.svelte'
   import { getPreferences } from '$lib/stores/preferences.svelte'
   import {
@@ -38,7 +36,7 @@
   import { BUILTIN_PRESETS } from '$lib/theme/presets'
   import { parseJsonc } from '$lib/theme/jsonc'
   import { convertVsCodeTheme } from '$lib/theme/vscode-import'
-  import { commands, unwrapResult } from '$lib/tauri-bindings'
+  import { commands } from '$lib/wails-bindings'
   import { confirm } from '$lib/stores/confirm.svelte'
   import { toast } from '$lib/stores/toast'
   import { logger } from '$lib/logger'
@@ -88,24 +86,21 @@
   }
 
   /**
-   * File picker → Rust read (size/extension gated) → JSONC parse → engine
+   * File picker → Go read (size/extension gated) → JSONC parse → engine
    * conversion → registry, then activate in the slot matching the theme's
    * own mode. Every failure lands in a toast with the converter's actionable
    * message; a cancelled picker is not a failure.
    */
   async function importTheme(): Promise<void> {
     try {
-      const path = await openFileDialog({
-        multiple: false,
-        directory: false,
-        filters: [{ name: 'VS Code Theme', extensions: ['json', 'jsonc'] }],
-      })
-      if (path === null) return
-
-      const text = unwrapResult(await commands.readThemeFile(String(path)))
+      const file = await commands.pickThemeFile(
+        'VS Code Theme',
+        'VS Code Theme',
+      )
+      if (file === null) return
       let parsed: unknown
       try {
-        parsed = parseJsonc(text)
+        parsed = parseJsonc(file.text)
       } catch {
         toast.error(t('preferences.appearance.importFailed'), {
           description: t('preferences.appearance.importInvalidJson'),
@@ -113,8 +108,7 @@
         return
       }
 
-      const fileName = String(path).replace(/^.*[\\/]/, '')
-      const result = convertVsCodeTheme(parsed, { fileName })
+      const result = convertVsCodeTheme(parsed, { fileName: file.name })
       if (result.error !== undefined) {
         toast.error(t('preferences.appearance.importFailed'), {
           description: result.error,
@@ -340,7 +334,6 @@
       disabled={getPlatform() === 'linux'}
       onCheckedChange={(v) => {
         setWindowEffects(v)
-        void applyWindowEffects(v)
       }}
     />
   </div>

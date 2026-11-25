@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { mockIPC } from '@tauri-apps/api/mocks'
+import { mockIPC } from '$lib/../test/ipc'
 
 vi.mock('$lib/logger', () => ({
   logger: { warn: vi.fn(), error: vi.fn() },

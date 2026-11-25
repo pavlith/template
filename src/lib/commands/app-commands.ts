@@ -1,4 +1,4 @@
-import { commands, unwrapResult } from '$lib/tauri-bindings'
+import { commands, unwrapResult } from '$lib/wails-bindings'
 import { getResolvedMode, setThemeMode } from '$lib/stores/theme.svelte'
 import { requestQuit } from '$lib/lifecycle'
 import { logger } from '$lib/logger'

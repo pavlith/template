@@ -9,8 +9,8 @@ import LinuxTitleBar from './LinuxTitleBar.svelte'
  * stops dragging, or the title drifts as the side clusters change width.
  *
  * Only the shell and the Linux variant are mounted here — the macOS and
- * Windows variants call getCurrentWindow() at module scope, which needs a real
- * Tauri host.
+ * Windows variants call currentWindow at module scope, which needs a real
+ * Wails host.
  */
 
 function text(html: string) {
@@ -41,9 +41,9 @@ describe('TitleBarShell', () => {
     // the leading cluster's no-drag rect in the native (paint-order) region
     // computation, making fast double-clicks on the left buttons maximize.
     const el = render(TitleBarShell, { title: 'Anything' })
-    expect(el.querySelectorAll('[data-tauri-drag-region]')).toHaveLength(1)
+    expect(el.querySelectorAll('[data-window-drag]')).toHaveLength(1)
     const overlay = el.querySelector('.absolute')
-    expect(overlay?.hasAttribute('data-tauri-drag-region')).toBe(false)
+    expect(overlay?.hasAttribute('data-window-drag')).toBe(false)
   })
 
   it('centres the title independently of the side clusters', () => {
@@ -92,12 +92,10 @@ describe('LinuxTitleBar', () => {
     expect(el.querySelector('[data-testid="left"]')).not.toBeNull()
     expect(el.querySelector('[data-testid="right"]')).not.toBeNull()
     // Draggable surface: the bar itself, nothing else.
-    expect(el.querySelectorAll('[data-tauri-drag-region=""]')).toHaveLength(1)
+    expect(el.querySelectorAll('[data-window-drag=""]')).toHaveLength(1)
     // The action clusters opt out of dragging so that a fast double-click
     // beside a titlebar button cannot read as "maximize the window".
-    expect(
-      el.querySelectorAll('[data-tauri-drag-region="false"]'),
-    ).toHaveLength(2)
+    expect(el.querySelectorAll('[data-window-drag="false"]')).toHaveLength(2)
     expect(el.textContent).toContain('Linux')
   })
 })

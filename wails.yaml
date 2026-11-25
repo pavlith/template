@@ -1,0 +1,26 @@
+# yaml-language-server: $schema=https://v3.wails.io/schemas/wails.v3.json
+version: 3
+project:
+  name: wails-app
+  product_name: Wails App
+  identifier: com.tauri-app.app
+  version: 0.1.0
+  icon: build/appicon.png
+frontend:
+  directory: .
+  install: [pnpm, install, --frozen-lockfile]
+  build: [pnpm, build]
+  dev: [pnpm, dev]
+  output: dist
+  bindings:
+    typescript: true
+    interfaces: true
+    output: bindings
+packages:
+  deb: {}
+  dmg: {}
+  nsis: {}
+protocols:
+  tauri-app:
+    description: Open a Wails App link
+    platforms: [darwin, windows, linux]

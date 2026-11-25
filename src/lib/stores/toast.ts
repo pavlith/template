@@ -4,7 +4,7 @@ import { toast as sonnerToast } from 'svelte-sonner'
  * Thin wrapper over svelte-sonner.
  *
  * App code imports from here rather than from `svelte-sonner` directly — the
- * same seam `tauri-bindings.ts` provides over the generated bindings. It keeps
+ * same seam `wails-bindings.ts` provides over the generated bindings. It keeps
  * one import surface, narrows the option bag to what this template supports,
  * and lets tests mock `$lib/stores/toast` instead of reaching into the toast
  * library's internals.

@@ -1,11 +1,11 @@
-import { getCurrentWindow } from '@tauri-apps/api/window'
-import { platform } from '@tauri-apps/plugin-os'
+import { currentWindow } from '$lib/native-window'
+import { getPlatform } from '$lib/hooks/use-platform.svelte'
 import { setSquareCorners } from '$lib/stores/ui.svelte'
 
 export function initSquareCorners(): () => void {
-  if (platform() === 'macos') return () => {}
+  if (getPlatform() === 'macos') return () => {}
 
-  const win = getCurrentWindow()
+  const win = currentWindow
   let cancelled = false
 
   const update = async () => {

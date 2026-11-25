@@ -13,17 +13,17 @@
   import { getPreferences } from '$lib/stores/preferences.svelte'
   import { getPlatform } from '$lib/hooks/use-platform.svelte'
   import { formatShortcut } from '$lib/platform-strings'
-  import { fromTauriAccelerator } from '$lib/shortcuts'
+  import { fromNativeAccelerator } from '$lib/shortcuts'
   import { t } from '$lib/i18n/t.svelte'
 
   const paletteShortcut = $derived(formatShortcut(getPlatform(), 'k', ['mod']))
 
-  // The Quick Pane accelerator is stored as a Tauri accelerator string; a
+  // The Quick Pane accelerator is stored as a native accelerator string; a
   // cleared binding shows the row without a chip rather than a stale default.
   const quickPaneShortcut = $derived.by(() => {
     const accelerator = getPreferences().quickPaneShortcut
     if (!accelerator) return null
-    const { key, modifiers } = fromTauriAccelerator(accelerator)
+    const { key, modifiers } = fromNativeAccelerator(accelerator)
     return key ? formatShortcut(getPlatform(), key, modifiers) : null
   })
 

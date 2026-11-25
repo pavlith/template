@@ -8,8 +8,7 @@ const SEMVER = /^v?(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/
 
 const FILES = {
   pkg: 'package.json',
-  cargo: 'src-tauri/Cargo.toml',
-  tauri: 'src-tauri/tauri.conf.json',
+  wails: 'wails.yaml',
 }
 
 function die(message) {
@@ -71,40 +70,15 @@ pkg.version = version
 writeFileSync(FILES.pkg, JSON.stringify(pkg, null, 2) + '\n')
 console.log(`  ✓ ${FILES.pkg}`)
 
-const cargo = readFileSync(FILES.cargo, 'utf-8')
-const updated = cargo.replace(
-  /^version\s*=\s*"[^"]*"/m,
-  `version = "${version}"`,
+const manifest = readFileSync(FILES.wails, 'utf-8')
+const versionField = /^ {2}version: ([^\r\n]+)$/m
+if (!versionField.test(manifest))
+  die(`Could not find project.version in ${FILES.wails}`)
+writeFileSync(
+  FILES.wails,
+  manifest.replace(versionField, `  version: ${version}`),
 )
-if (updated === cargo) die(`Could not find version field in ${FILES.cargo}`)
-writeFileSync(FILES.cargo, updated)
-console.log(`  ✓ ${FILES.cargo}`)
-
-const tauri = JSON.parse(readFileSync(FILES.tauri, 'utf-8'))
-tauri.version = version
-writeFileSync(FILES.tauri, JSON.stringify(tauri, null, 2) + '\n')
-console.log(`  ✓ ${FILES.tauri}`)
-
-// --- Refresh lockfile --------------------------------------------------------
-
-console.log('\n  Refreshing lockfile…\n')
-exec('pnpm', ['install'])
-
-// --- Cargo check -------------------------------------------------------------
-
-console.log('\n  Verifying Cargo.toml…\n')
-exec('cargo', ['check'], { cwd: 'src-tauri' })
-
-// --- Updater sanity ----------------------------------------------------------
-
-const tauriConf = JSON.parse(readFileSync(FILES.tauri, 'utf-8'))
-const pubkey = tauriConf?.plugins?.updater?.pubkey ?? ''
-if (pubkey.includes('REPLACE') || !pubkey) {
-  console.warn(
-    '\n  ⚠  Updater pubkey is still a placeholder — the signed artifacts',
-    'will not verify until you replace it.\n',
-  )
-}
+console.log(`  ✓ ${FILES.wails}`)
 
 // --- Prompt ------------------------------------------------------------------
 

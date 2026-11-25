@@ -1,8 +1,8 @@
 <script lang="ts">
   import { onMount } from 'svelte'
-  import { emit, listen } from '@tauri-apps/api/event'
-  import { getCurrentWindow } from '@tauri-apps/api/window'
-  import { commands, unwrapResult } from '$lib/tauri-bindings'
+  import { emit, listen } from '$lib/native-window'
+  import { currentWindow } from '$lib/native-window'
+  import { commands, unwrapResult } from '$lib/wails-bindings'
   import { paintFromHint } from '$lib/theme/paint-hint'
   import { QUICK_PANE_SUBMIT_EVENT } from '$lib/quick-pane/events'
   import { t } from '$lib/i18n/t.svelte'
@@ -16,7 +16,7 @@
    * Root of the Quick Pane window.
    *
    * This component runs in its own webview, so none of the main window's stores
-   * are reachable — everything it needs arrives over Tauri events or via
+   * are reachable — everything it needs arrives over Wails events or via
    * `localStorage`, which the two windows share by virtue of a common origin.
    */
 
@@ -24,7 +24,7 @@
   let input = $state<HTMLInputElement | null>(null)
 
   function dismiss(): void {
-    // Always the command, never `window.hide()`: the Rust side owns the
+    // Always the command, never `window.hide()`: the Go backend owns the
     // visibility guard, so every dismissal path behaves identically.
     void (async () => {
       try {
@@ -60,7 +60,7 @@
   }
 
   onMount(() => {
-    const window = getCurrentWindow()
+    const window = currentWindow
 
     // Its own webview, so it needs its own suppressor — Ctrl+F would otherwise
     // drop a find bar over a pane that is one text field tall.

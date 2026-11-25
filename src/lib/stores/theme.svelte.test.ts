@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { mockIPC } from '@tauri-apps/api/mocks'
+import { mockIPC } from '$lib/../test/ipc'
 import {
   initTheme,
   setThemeMode,
@@ -32,7 +32,7 @@ import {
 } from '$lib/theme/paint-hint'
 import type { ThemePreset } from '$lib/theme/schema'
 
-vi.mock('@tauri-apps/api/event', () => ({
+vi.mock('$lib/native-window', () => ({
   emit: vi.fn(),
   listen: vi.fn(() => Promise.resolve(() => {})),
 }))
@@ -143,7 +143,7 @@ describe('setThemeMode', () => {
   })
 
   it('emits theme-changed event', async () => {
-    const { emit } = await import('@tauri-apps/api/event')
+    const { emit } = await import('$lib/native-window')
     await initPreferences()
     initTheme()
 
@@ -158,7 +158,7 @@ describe('setThemeMode', () => {
   it('reports the resolved theme alongside the mode', async () => {
     // Other windows repaint from the resolved value; 'system' alone would not
     // tell them which way to paint.
-    const { emit } = await import('@tauri-apps/api/event')
+    const { emit } = await import('$lib/native-window')
     matchMediaMatches = true
     await initPreferences()
     initTheme()
@@ -174,7 +174,7 @@ describe('setThemeMode', () => {
 
 describe('reconcileTheme', () => {
   it('repaints without emitting', async () => {
-    const { emit } = await import('@tauri-apps/api/event')
+    const { emit } = await import('$lib/native-window')
     await initPreferences()
     initTheme()
 
@@ -345,7 +345,7 @@ describe('system mode matchMedia', () => {
   it('emits on OS change so other windows follow', async () => {
     // No preference changed here, but the resolved theme did — and the Quick
     // Pane has no matchMedia listener of its own while it is hidden.
-    const { emit } = await import('@tauri-apps/api/event')
+    const { emit } = await import('$lib/native-window')
     await initPreferences()
     initTheme()
     setThemeMode('system')
@@ -360,7 +360,7 @@ describe('system mode matchMedia', () => {
   })
 
   it('does not emit on OS change when the mode is not system', async () => {
-    const { emit } = await import('@tauri-apps/api/event')
+    const { emit } = await import('$lib/native-window')
     await initPreferences()
     initTheme()
     setThemeMode('light')

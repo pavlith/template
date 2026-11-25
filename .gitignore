@@ -1,9 +1,9 @@
 my-docs/
 
-# Rust / Tauri
-src-tauri/target/
-src-tauri/binaries/
-src-tauri/gen/
+# Wails
+.wails/
+bin/
+*.syso
 
 # Node
 node_modules/

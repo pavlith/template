@@ -9,86 +9,63 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  create-release:
-    name: Create draft release
-    runs-on: ubuntu-latest
-    outputs:
-      release_id: ${{ steps.create.outputs.id }}
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v7
-
-      - name: Create GitHub Release
-        id: create
-        uses: softprops/action-gh-release@v3
-        with:
-          draft: true
-          generate_release_notes: true
-
-  build-tauri:
-    name: Build (${{ matrix.platform }})
-    needs: create-release
+  build:
+    name: Package (${{ matrix.platform }})
     runs-on: ${{ matrix.platform }}
-    permissions:
-      contents: write
     strategy:
       fail-fast: false
       matrix:
         include:
           - platform: macos-latest
-            args: '--target aarch64-apple-darwin'
-          - platform: macos-latest
-            args: '--target x86_64-apple-darwin'
+            format: dmg
+          - platform: macos-15-intel
+            format: dmg
           - platform: ubuntu-24.04
-            args: ''
+            format: deb
           - platform: windows-latest
-            args: ''
+            format: nsis
     steps:
       - uses: actions/checkout@v7
-
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
       - uses: pnpm/action-setup@v6
-
       - uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: pnpm
-
-      - run: pnpm install --frozen-lockfile
-
-      - uses: dtolnay/rust-toolchain@stable
-
-      - uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: src-tauri
-
-      - name: Install macOS cross-compile target
-        if: matrix.platform == 'macos-latest'
-        run: |
-          rustup target add aarch64-apple-darwin
-          rustup target add x86_64-apple-darwin
-
-      - name: Install Tauri system dependencies (Linux)
-        if: matrix.platform == 'ubuntu-24.04'
+      - name: Install Wails system dependencies
+        if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y \
-            libwebkit2gtk-4.1-dev \
-            libappindicator3-dev \
-            librsvg2-dev \
-            patchelf \
-            libgtk-3-dev
-
-      - name: Build and upload
-        uses: tauri-apps/tauri-action@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
-          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+          sudo apt-get install -y libgtk-4-dev libwebkitgtk-6.0-dev libx11-dev
+      - name: Install NSIS
+        if: runner.os == 'Windows'
+        run: choco install nsis --yes --no-progress
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm wails build --formats ${{ matrix.format }}
+      - uses: actions/upload-artifact@v7
         with:
-          releaseId: ${{ needs.create-release.outputs.release_id }}
-          tagName: 'v__VERSION__'
-          releaseName: 'v__VERSION__'
-          releaseDraft: true
-          prerelease: false
-          args: ${{ matrix.args }}
+          name: desktop-${{ matrix.platform }}
+          path: bin/**/*.${{ matrix.format == 'nsis' && 'exe' || matrix.format }}
+          if-no-files-found: error
+
+  draft:
+    name: Create draft release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: desktop-*
+          path: packages
+      - uses: softprops/action-gh-release@v3
+        with:
+          draft: true
+          generate_release_notes: true
+          files: |
+            packages/**/*.deb
+            packages/**/*.dmg
+            packages/**/*.exe

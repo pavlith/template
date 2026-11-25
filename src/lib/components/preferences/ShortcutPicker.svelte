@@ -3,9 +3,9 @@
   import { getPreferences } from '$lib/stores/preferences.svelte'
   import {
     buildCombo,
-    fromTauriAccelerator,
+    fromNativeAccelerator,
     isValidGlobalShortcutCombo,
-    toTauriAccelerator,
+    toNativeAccelerator,
   } from '$lib/shortcuts'
   import { formatShortcut } from '$lib/platform-strings'
   import { getPlatform } from '$lib/hooks/use-platform.svelte'
@@ -15,7 +15,7 @@
   import type { ShortcutPurposeId } from './commit-shortcut'
 
   /**
-   * `purpose` selects both the Rust-side registration slot and the preference
+   * `purpose` selects both the backend registration slot and the preference
    * that stores it, so one picker serves every rebindable global shortcut.
    */
   let { purpose }: { purpose: ShortcutPurposeId } = $props()
@@ -30,7 +30,7 @@
 
   const display = $derived.by(() => {
     if (!accelerator) return null
-    const { key, modifiers } = fromTauriAccelerator(accelerator)
+    const { key, modifiers } = fromNativeAccelerator(accelerator)
     return formatShortcut(getPlatform(), key, modifiers)
   })
 
@@ -72,7 +72,7 @@
     if (!isValidGlobalShortcutCombo(combo)) return
 
     listening = false
-    void apply(toTauriAccelerator(combo))
+    void apply(toNativeAccelerator(combo))
   }
 
   function focusOnMount(node: HTMLElement) {

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { mockIPC } from '@tauri-apps/api/mocks'
+import { mockIPC } from '$lib/../test/ipc'
 
 vi.mock('$lib/logger', () => ({
   logger: { warn: vi.fn(), error: vi.fn() },
@@ -17,10 +17,7 @@ describe('commitAutostart', () => {
 
     expect(await commitAutostart(true)).toEqual({ ok: true })
     expect(await commitAutostart(false)).toEqual({ ok: true })
-    expect(calls).toEqual([
-      'plugin:autostart|enable',
-      'plugin:autostart|disable',
-    ])
+    expect(calls).toEqual(['enable_autostart', 'disable_autostart'])
   })
 
   it('reports failure instead of throwing', async () => {
@@ -36,7 +33,7 @@ describe('commitAutostart', () => {
 
 describe('readAutostartState', () => {
   it('returns the OS registration state', async () => {
-    mockIPC((cmd) => (cmd === 'plugin:autostart|is_enabled' ? true : undefined))
+    mockIPC((cmd) => (cmd === 'is_autostart_enabled' ? true : undefined))
     expect(await readAutostartState()).toBe(true)
   })
 

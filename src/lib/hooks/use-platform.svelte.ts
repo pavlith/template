@@ -1,22 +1,15 @@
-import { platform, type Platform } from '@tauri-apps/plugin-os'
+import { System } from '@wailsio/runtime'
 
 export type AppPlatform = 'macos' | 'windows' | 'linux'
 
 let cached: AppPlatform | null = null
 
-function map(p: Platform): AppPlatform {
-  if (p === 'macos') return 'macos'
-  if (p === 'windows') return 'windows'
-  return 'linux'
-}
-
 export function getPlatform(): AppPlatform {
   if (cached === null) {
-    try {
-      cached = map(platform())
-    } catch {
-      cached = 'macos'
-    }
+    if (System.IsMac() || /Mac/.test(navigator.platform)) cached = 'macos'
+    else if (System.IsWindows() || /Win/.test(navigator.platform))
+      cached = 'windows'
+    else cached = 'linux'
   }
   return cached
 }

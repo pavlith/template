@@ -4,55 +4,56 @@
   import { Separator } from '$lib/components/ui/separator'
   import { Button } from '$lib/components/ui/button'
   import ExternalLinkIcon from '@lucide/svelte/icons/external-link'
-  import { getName, getVersion, getTauriVersion } from '@tauri-apps/api/app'
-  import { platform, arch, version } from '@tauri-apps/plugin-os'
-  import { openUrl } from '@tauri-apps/plugin-opener'
-  import { check } from '@tauri-apps/plugin-updater'
-  import { relaunch } from '@tauri-apps/plugin-process'
+  import { Browser } from '@wailsio/runtime'
+  import { commands } from '$lib/wails-bindings'
+  import { confirmQuitIfDirty, flushAllStores } from '$lib/lifecycle'
   import { toast } from '$lib/stores/toast'
   import { t } from '$lib/i18n/t.svelte'
 
   let appName = $state('…')
   let appVersion = $state('…')
-  let tauriVersion = $state('…')
+  let wailsVersion = $state('…')
+  let updaterConfigured = $state(false)
   let platformInfo = $state('…')
   let updateStatus = $state<'idle' | 'checking' | 'downloading' | 'ready'>(
     'idle',
   )
 
   onMount(async () => {
-    const [name, ver, tauri, plat, archVal, osVer] = await Promise.all([
-      getName(),
-      getVersion(),
-      getTauriVersion(),
-      platform(),
-      arch(),
-      version(),
+    const [info, configured] = await Promise.all([
+      commands.getSystemInfo(),
+      commands.updateConfigured(),
     ])
-    appName = name
-    appVersion = ver
-    tauriVersion = tauri
-    platformInfo = `${plat} ${osVer} (${archVal})`
+    appName = info.appName
+    appVersion = info.appVersion
+    wailsVersion = info.wailsVersion
+    platformInfo = `${info.osName} ${info.osVersion} (${info.osArch})`
+    updaterConfigured = configured
   })
 
   function openLink(urlKey: string): void {
-    void openUrl(t(urlKey))
+    void Browser.OpenURL(t(urlKey))
   }
 
   async function checkForUpdates(): Promise<void> {
     updateStatus = 'checking'
     try {
-      const update = await check()
+      const update = await commands.checkForUpdate()
       if (!update) {
         toast.success(t('preferences.about.upToDate'))
         updateStatus = 'idle'
         return
       }
       updateStatus = 'downloading'
-      await update.downloadAndInstall()
+      await commands.installUpdate()
       updateStatus = 'ready'
       toast.success(t('preferences.about.updateReady'))
-      await relaunch()
+      if (await confirmQuitIfDirty()) {
+        await flushAllStores()
+        await commands.restartForUpdate()
+      } else {
+        updateStatus = 'idle'
+      }
     } catch {
       toast.error(t('preferences.about.updateError'))
       updateStatus = 'idle'
@@ -70,7 +71,7 @@
   <Button
     variant="default"
     size="sm"
-    disabled={updateStatus !== 'idle'}
+    disabled={!updaterConfigured || updateStatus !== 'idle'}
     onclick={checkForUpdates}
   >
     {#if updateStatus === 'checking'}
@@ -92,9 +93,9 @@
   <div class="divide-y rounded-md border">
     <div class="flex items-center justify-between gap-4 px-3 py-2 text-sm">
       <span class="text-muted-foreground">
-        {t('preferences.about.tauriVersionLabel')}
+        {t('preferences.about.wailsVersionLabel')}
       </span>
-      <span class="font-mono text-xs">{tauriVersion}</span>
+      <span class="font-mono text-xs">{wailsVersion}</span>
     </div>
     <div class="flex items-center justify-between gap-4 px-3 py-2 text-sm">
       <span class="text-muted-foreground">

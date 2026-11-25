@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom/vitest'
 import { beforeEach, afterEach, vi } from 'vitest'
-import { mockIPC, clearMocks } from '@tauri-apps/api/mocks'
+import { mockIPC, clearMocks } from './ipc'
 
 if (!globalThis.ResizeObserver) {
   globalThis.ResizeObserver = class {

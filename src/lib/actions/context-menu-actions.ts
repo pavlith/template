@@ -13,7 +13,7 @@ import { showTextInputContextMenu } from '$lib/context-menu'
 export const textInputContextMenu: Action<HTMLElement> = (node) => {
   const handler = (e: MouseEvent) => {
     e.preventDefault()
-    void showTextInputContextMenu()
+    void showTextInputContextMenu(e)
   }
   node.addEventListener('contextmenu', handler)
   return {

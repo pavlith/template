@@ -17,7 +17,7 @@ import type { ThemePreset, ThemeProfile } from './schema'
 // near-white primary), which zeroes the chroma of the derived semantic
 // colours — hence the pinned red danger, the one semantic token the
 // template's Tailwind map actually uses (--destructive). Anchors are
-// mirrored by `ThemeProfile::default_*` in `src-tauri/src/types.rs`.
+// mirrored by `ThemeProfile::default_*` in `storage.go`.
 export const DEFAULT_LIGHT: ThemePreset = {
   id: 'default-light',
   name: 'Default Light',

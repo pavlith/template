@@ -1,4 +1,4 @@
-import { listen } from '@tauri-apps/api/event'
+import { listen } from '$lib/native-window'
 import { setLastQuickPaneEntry } from '$lib/stores/ui.svelte'
 import { toast } from '$lib/stores/toast'
 import { t } from '$lib/i18n/t.svelte'
@@ -10,7 +10,7 @@ import type { QuickPaneSubmitPayload } from './events'
  * Records one Quick Pane submission in the main window.
  *
  * Split out from the listener so the interesting half — what a submission
- * actually does — is testable without a Tauri runtime.
+ * actually does — is testable without a Wails runtime.
  */
 export function applyQuickPaneEntry(text: string): void {
   const entry = text.trim()

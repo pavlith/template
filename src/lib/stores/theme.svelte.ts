@@ -1,4 +1,4 @@
-import { emit } from '@tauri-apps/api/event'
+import { emit } from '$lib/native-window'
 import { getPreferences, setPreference } from './preferences.svelte'
 import {
   THEME_STORAGE_KEY,
@@ -24,7 +24,7 @@ import {
   type ReducedMotion,
   type ThemeMode,
 } from './preferences-schema'
-import type { ImportedTheme } from '$lib/tauri-bindings'
+import type { ImportedTheme } from '$lib/wails-bindings'
 
 // The generated ImportedTheme mirrors ThemePreset but is looser (string
 // mode, required nullable overrides) — sanitizePreferences has already run
@@ -201,11 +201,7 @@ export function setPointerCursors(enabled: boolean): void {
   broadcast()
 }
 
-/**
- * Persists the vibrancy preference and repaints the CSS side. The native
- * `setEffects` IPC (`applyWindowEffects`) is async and called separately by
- * the toggle handler — it is not part of the sync paint pipeline.
- */
+/** Persists the preference and paints over or reveals the native backdrop. */
 export function setWindowEffects(enabled: boolean): void {
   setPreference('windowEffects', enabled)
   repaint()

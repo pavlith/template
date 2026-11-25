@@ -2,7 +2,7 @@
   import ChevronDownIcon from '@lucide/svelte/icons/chevron-down'
   import * as Command from '$lib/components/ui/command'
   import { Button } from '$lib/components/ui/button'
-  import { commands, unwrapResult } from '$lib/tauri-bindings'
+  import { commands, unwrapResult } from '$lib/wails-bindings'
   import { logger } from '$lib/logger'
   import { t } from '$lib/i18n/t.svelte'
 

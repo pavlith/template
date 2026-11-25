@@ -1,8 +1,8 @@
 <script lang="ts">
   import { onMount } from 'svelte'
-  import { listen } from '@tauri-apps/api/event'
-  import { getCurrentWindow } from '@tauri-apps/api/window'
-  import { commands, unwrapResult } from '$lib/tauri-bindings'
+  import { listen } from '$lib/native-window'
+  import { currentWindow } from '$lib/native-window'
+  import { commands, unwrapResult } from '$lib/wails-bindings'
   import { initSquareCorners } from '$lib/stores/square-corners.svelte'
   import { initPreferences } from '$lib/stores/preferences.svelte'
   import { getAppState, initAppState } from '$lib/stores/app-state.svelte'
@@ -13,7 +13,6 @@
     requestQuit,
   } from '$lib/lifecycle'
   import { initQuickPaneBridge } from '$lib/quick-pane/bridge'
-  import { registerDeepLinkSchemeInDev } from '$lib/deep-link'
   import { toast } from '$lib/stores/toast'
   import {
     getSquareCorners,
@@ -23,7 +22,6 @@
     isRightSidebarVisible,
   } from '$lib/stores/ui.svelte'
   import { initTheme, reconcileTheme } from '$lib/stores/theme.svelte'
-  import { applyWindowEffects } from '$lib/theme/window-effects'
   import { initializeLanguage } from '$lib/i18n/language-init'
   import { initCommands } from '$lib/commands'
   import { getPlatform } from '$lib/hooks/use-platform.svelte'
@@ -108,14 +106,14 @@
     let unlistenDeepLink: (() => void) | undefined
     let destroyed = false
 
-    const appWindow = getCurrentWindow()
+    const appWindow = currentWindow
 
     void (async () => {
       // Register the close listener before showing the window so the user
       // can never click X before the handler exists. The flush failure is
       // swallowed on purpose: losing a debounced write is better than a
       // window that refuses to close.
-      const unlisten = await listen<{ hide: boolean }>(
+      const unlisten = await listen<boolean>(
         'app:close-requested',
         async (event) => {
           if (!(await confirmQuitIfDirty())) return
@@ -124,7 +122,7 @@
           } catch (e) {
             logger.error('Flushing stores on close failed', e)
           }
-          if (event.payload.hide) {
+          if (event.payload) {
             await appWindow.hide()
             return
           }
@@ -172,9 +170,6 @@
       try {
         const [prefs] = await Promise.all([initPreferences(), initAppState()])
         reconcileTheme()
-        // Before show() so a vibrancy user never sees an opaque→translucent
-        // pop. The CSS side is already painted via the paint hint.
-        await applyWindowEffects(prefs.windowEffects)
         await initializeLanguage(prefs.language)
         if (!destroyed) cleanupCommands = initCommands()
         // Before show() so the first frame the user ever sees already has
@@ -182,7 +177,9 @@
         if (!destroyed && !getAppState().onboardingCompleted) {
           openOnboardingDialog()
         }
-        void registerDeepLinkSchemeInDev()
+        const links = await commands.mainReady()
+        for (const url of links ?? [])
+          toast.info(t('deepLink.receivedToast', { url }))
         void commands.cleanupOldRecoveryFiles()
         void checkForRecentCrash()
       } finally {

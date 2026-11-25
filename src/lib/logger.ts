@@ -53,12 +53,10 @@ class Logger {
   ): void {
     void (async () => {
       try {
-        const { warn: logWarn, error: logError } =
-          await import('@tauri-apps/plugin-log')
+        const { commands } = await import('$lib/wails-bindings')
         const fullMessage =
           args.length > 0 ? `${message} ${JSON.stringify(args)}` : message
-        if (level === 'warn') logWarn(fullMessage)
-        else logError(fullMessage)
+        await commands.logFrontend(level, fullMessage)
       } catch {
         // Logging must never throw
       }
@@ -67,7 +65,7 @@ class Logger {
   private forwardToCrashReporter(message: string, args: unknown[]): void {
     void (async () => {
       try {
-        const { commands } = await import('$lib/tauri-bindings')
+        const { commands } = await import('$lib/wails-bindings')
         const fullMessage =
           args.length > 0 ? `${message} ${JSON.stringify(args)}` : message
         await commands.logFrontendError(fullMessage, null, null)

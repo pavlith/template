@@ -1,14 +1,10 @@
-import {
-  Menu,
-  MenuItem,
-  PredefinedMenuItem,
-  Submenu,
-} from '@tauri-apps/api/menu'
+import { commands } from '$lib/wails-bindings'
+import { Events } from '@wailsio/runtime'
 import type { AppPlatform } from '$lib/hooks/use-platform.svelte'
 import { getPlatform } from '$lib/hooks/use-platform.svelte'
 import { executeCommand } from '$lib/commands/registry.svelte'
 import { getCommand, getEffectiveShortcut } from '$lib/commands/registry.svelte'
-import { toTauriAccelerator } from '$lib/shortcuts'
+import { toNativeAccelerator } from '$lib/shortcuts'
 import i18n from '$lib/i18n/config'
 import {
   TOGGLE_THEME,
@@ -67,7 +63,7 @@ function commandItem(
     id: commandId,
     labelKey: labelKeyOverride ?? command?.labelKey ?? commandId,
     commandId,
-    accelerator: shortcut ? toTauriAccelerator(shortcut) : undefined,
+    accelerator: shortcut ? toNativeAccelerator(shortcut) : undefined,
   }
 }
 
@@ -160,63 +156,36 @@ export function buildMenuSpec(platform: AppPlatform): SubmenuSpec[] {
   ]
 }
 
-function isMenuItemSpec(
-  spec: MenuItemSpec | SeparatorSpec | PredefinedSpec,
-): spec is MenuItemSpec {
-  return 'commandId' in spec
-}
-
-function isSeparatorSpec(
-  spec: MenuItemSpec | SeparatorSpec | PredefinedSpec,
-): spec is SeparatorSpec {
-  return 'separator' in spec
-}
-
-async function materialize(spec: SubmenuSpec[]): Promise<Menu> {
-  const submenus = await Promise.all(
-    spec.map(async (sub) => {
-      const items = await Promise.all(
-        sub.items.map((item) => {
-          if (isSeparatorSpec(item)) {
-            return PredefinedMenuItem.new({ item: 'Separator' })
-          }
-          if (isMenuItemSpec(item)) {
-            return MenuItem.new({
-              id: item.id,
-              text: i18n.t(item.labelKey),
-              accelerator: item.accelerator,
-              action: () => {
-                void executeCommand(item.commandId)
-              },
-            })
-          }
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          return PredefinedMenuItem.new({ item: item.predefined } as any)
-        }),
-      )
-      return Submenu.new({
-        text: i18n.t(sub.labelKey),
-        items,
-      })
-    }),
-  )
-
-  return Menu.new({ items: submenus })
-}
-
 async function buildAndApplyMenu(): Promise<void> {
   const platform = getPlatform()
-  const spec = buildMenuSpec(platform)
-  const menu = await materialize(spec)
-
-  if (platform === 'macos') {
-    await menu.setAsAppMenu()
-  }
-  // Windows/Linux: menu is intentionally not attached.
-  // The custom titlebar replaces native decorations;
-  // attaching would add a second menu strip above it.
-  // Uncomment below if switching to native decorations:
-  // await menu.setAsWindowMenu()
+  if (platform !== 'macos') return
+  const menu = buildMenuSpec(platform).map((sub) => ({
+    label: i18n.t(sub.labelKey),
+    items: sub.items.map((item) => {
+      if ('commandId' in item) {
+        return {
+          id: item.commandId,
+          label: i18n.t(item.labelKey),
+          accelerator: item.accelerator ?? '',
+          role: '',
+          disabled: false,
+        }
+      }
+      return {
+        id: '',
+        label: '',
+        accelerator: '',
+        role:
+          'separator' in item
+            ? 'Separator'
+            : typeof item.predefined === 'string'
+              ? item.predefined
+              : 'About',
+        disabled: false,
+      }
+    }),
+  }))
+  await commands.setAppMenu(menu)
 }
 
 /**
@@ -235,8 +204,12 @@ export async function initMenu(): Promise<() => void> {
     void buildAndApplyMenu()
   }
   i18n.on('languageChanged', onLanguageChanged)
+  const off = Events.On('app:menu-command', ({ data }) => {
+    void executeCommand(data as string)
+  })
 
   return () => {
+    off()
     i18n.off('languageChanged', onLanguageChanged)
   }
 }

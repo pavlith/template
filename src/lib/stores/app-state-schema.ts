@@ -1,4 +1,4 @@
-import type { PersistedAppState } from '$lib/tauri-bindings'
+import type { PersistedAppState } from '$lib/wails-bindings'
 
 export const MAX_RECENT_ITEMS = 20
 

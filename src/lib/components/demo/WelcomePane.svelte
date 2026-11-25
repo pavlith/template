@@ -22,8 +22,8 @@
   import { confirm } from '$lib/stores/confirm.svelte'
   import { getLastQuickPaneEntry } from '$lib/stores/ui.svelte'
   import { getPreferences } from '$lib/stores/preferences.svelte'
-  import { fromTauriAccelerator } from '$lib/shortcuts'
-  import { commands, unwrapResult } from '$lib/tauri-bindings'
+  import { fromNativeAccelerator } from '$lib/shortcuts'
+  import { commands, unwrapResult } from '$lib/wails-bindings'
   import { parseShortcut } from '$lib/shortcuts'
   import { formatShortcut } from '$lib/platform-strings'
   import { getPlatform } from '$lib/hooks/use-platform.svelte'
@@ -58,7 +58,7 @@
   const quickPaneShortcut = $derived.by(() => {
     const accelerator = getPreferences().quickPaneShortcut
     if (!accelerator) return null
-    const { key, modifiers } = fromTauriAccelerator(accelerator)
+    const { key, modifiers } = fromNativeAccelerator(accelerator)
     return formatShortcut(getPlatform(), key, modifiers)
   })
 

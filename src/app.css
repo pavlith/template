@@ -229,7 +229,7 @@
 
   /*
    * The "Window Effects" preference. The window itself is always transparent
-   * (a creation-time flag, tauri.conf.json); this is the only place the
+   * (configured in main.go); this is the only place the
    * desktop actually shows through — body only, so dialogs, sidebars, and
    * other surfaces stay opaque for legibility.
    */
@@ -276,25 +276,6 @@
   }
 
   /*
-   * WebView2 honours `app-region` natively, and the attribute selector must
-   * not match `data-tauri-drag-region="false"` — otherwise the titlebar
-   * button clusters become native caption area, where a fast double-click
-   * maximizes the window before any JS runs. The explicit `no-drag` on the
-   * "false" subtree carves those clusters (and everything inside them) out
-   * of the surrounding drag region.
-   */
-  *[data-tauri-drag-region]:not([data-tauri-drag-region='false']) {
-    -webkit-app-region: drag;
-    app-region: drag;
-  }
-
-  *[data-tauri-drag-region='false'],
-  *[data-tauri-drag-region='false'] * {
-    -webkit-app-region: no-drag;
-    app-region: no-drag;
-  }
-
-  /*
    * Slim scrollbars in place of the webview's chunky default — the single
    * loudest "this is a website" tell. The transparent border + content-box
    * clip keeps the thumb visually thin while the full 10px stays grabbable.
@@ -323,4 +304,15 @@
   ::-webkit-scrollbar-corner {
     background: transparent;
   }
+}
+
+/* Wails reads this property on the pointer target, including nested content. */
+[data-window-drag=''] {
+  --wails-draggable: drag;
+}
+
+[data-window-drag='false'],
+[data-window-drag]
+  :is(button, a, input, textarea, select, [contenteditable='true']) {
+  --wails-draggable: no-drag;
 }

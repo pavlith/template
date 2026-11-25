@@ -1,5 +1,5 @@
-import { commands, unwrapResult } from '$lib/tauri-bindings'
-import type { AppPreferences, ShortcutPurpose } from '$lib/tauri-bindings'
+import { commands, unwrapResult } from '$lib/wails-bindings'
+import type { AppPreferences, ShortcutPurpose } from '$lib/wails-bindings'
 import {
   getPreferences,
   setPreferenceImmediate,
@@ -7,11 +7,11 @@ import {
 import { logger } from '$lib/logger'
 
 /**
- * The shortcuts a user can rebind, each pairing the Rust-side purpose with the
+ * The shortcuts a user can rebind, each pairing the backend purpose with the
  * preference that stores it.
  *
  * Adding a third global shortcut is a two-line change here plus a variant on
- * Rust's `ShortcutPurpose` — no new commit logic, no new picker component.
+ * Go's `ShortcutPurpose` — no new commit logic, no new picker component.
  */
 const PURPOSES = {
   focusMain: { purpose: 'focusMain', prefKey: 'globalShortcut' },

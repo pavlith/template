@@ -3,8 +3,8 @@ import {
   normalizeShortcut,
   parseShortcut,
   buildCombo,
-  toTauriAccelerator,
-  fromTauriAccelerator,
+  toNativeAccelerator,
+  fromNativeAccelerator,
   isValidGlobalShortcutCombo,
   createKeydownHandler,
 } from './shortcuts'
@@ -92,17 +92,17 @@ describe('buildCombo', () => {
   })
 })
 
-describe('toTauriAccelerator', () => {
+describe('toNativeAccelerator', () => {
   it('converts mod+k', () => {
-    expect(toTauriAccelerator('mod+k')).toBe('CmdOrCtrl+K')
+    expect(toNativeAccelerator('mod+k')).toBe('CmdOrCtrl+K')
   })
 
   it('converts mod+shift+b', () => {
-    expect(toTauriAccelerator('mod+shift+b')).toBe('CmdOrCtrl+Shift+B')
+    expect(toNativeAccelerator('mod+shift+b')).toBe('CmdOrCtrl+Shift+B')
   })
 
   it('converts alt+enter', () => {
-    expect(toTauriAccelerator('alt+enter')).toBe('Alt+enter')
+    expect(toNativeAccelerator('alt+enter')).toBe('Alt+enter')
   })
 })
 
@@ -192,32 +192,34 @@ describe('createKeydownHandler', () => {
   })
 })
 
-describe('fromTauriAccelerator', () => {
-  it('round-trips with toTauriAccelerator', () => {
+describe('fromNativeAccelerator', () => {
+  it('round-trips with toNativeAccelerator', () => {
     for (const combo of [
       'mod+k',
       'mod+shift+k',
       'mod+alt+p',
       'mod+shift+alt+f',
     ]) {
-      const { key, modifiers } = fromTauriAccelerator(toTauriAccelerator(combo))
+      const { key, modifiers } = fromNativeAccelerator(
+        toNativeAccelerator(combo),
+      )
       expect([...modifiers, key].join('+')).toBe(combo)
     }
   })
 
-  it('accepts the modifier spellings Tauri emits', () => {
-    expect(fromTauriAccelerator('CommandOrControl+Shift+.')).toEqual({
+  it('accepts the modifier spellings the previous backend emitted', () => {
+    expect(fromNativeAccelerator('CommandOrControl+Shift+.')).toEqual({
       key: '.',
       modifiers: ['mod', 'shift'],
     })
-    expect(fromTauriAccelerator('Ctrl+Alt+Delete')).toEqual({
+    expect(fromNativeAccelerator('Ctrl+Alt+Delete')).toEqual({
       key: 'delete',
       modifiers: ['mod', 'alt'],
     })
   })
 
   it('sorts modifiers into canonical order regardless of input order', () => {
-    expect(fromTauriAccelerator('Alt+Shift+CmdOrCtrl+J').modifiers).toEqual([
+    expect(fromNativeAccelerator('Alt+Shift+CmdOrCtrl+J').modifiers).toEqual([
       'mod',
       'shift',
       'alt',
@@ -225,7 +227,7 @@ describe('fromTauriAccelerator', () => {
   })
 
   it('collapses duplicate modifiers that map to the same key', () => {
-    expect(fromTauriAccelerator('Ctrl+Cmd+K').modifiers).toEqual(['mod'])
+    expect(fromNativeAccelerator('Ctrl+Cmd+K').modifiers).toEqual(['mod'])
   })
 })
 

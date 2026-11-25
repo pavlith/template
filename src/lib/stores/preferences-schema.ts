@@ -2,7 +2,7 @@ import type {
   AppPreferences,
   ImportedTheme,
   ThemeProfile,
-} from '$lib/tauri-bindings'
+} from '$lib/wails-bindings'
 import { validateThemePreset, validateThemeProfile } from '$lib/theme/schema'
 import { normalizeShortcut, parseShortcut } from '$lib/shortcuts'
 import {
@@ -34,14 +34,14 @@ export function isReducedMotion(value: unknown): value is ReducedMotion {
   )
 }
 
-/** Mirrors `validate_font_size` in `src-tauri/src/types.rs`. */
+/** Mirrors `validate_font_size` in `storage.go`. */
 export const FONT_SIZE_MIN = 12
 export const FONT_SIZE_MAX = 20
 
 /**
- * Mirrors `DEFAULT_QUICK_PANE_SHORTCUT` in `src-tauri/src/types.rs`.
+ * Mirrors `DEFAULT_QUICK_PANE_SHORTCUT` in `storage.go`.
  *
- * Rust owns the authoritative default — it registers the accelerator during
+ * Go owns the authoritative default — it registers the accelerator during
  * `setup()`, before the frontend exists — but the value is repeated here so a
  * failed load still shows the user what is actually bound.
  */

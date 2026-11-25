@@ -7,7 +7,7 @@ import type { AppPlatform } from '$lib/hooks/use-platform.svelte'
  * Ctrl+P opens a print dialog. Neither belongs in a desktop app that never
  * asked for them. The webview settings that would turn these off wholesale
  * (`AreBrowserAcceleratorKeysEnabled`) exist in wry but are not reachable
- * through Tauri 2.11, so the page cancels them instead — which works because
+ * on all Wails webviews, so the page cancels them instead — which works because
  * Chromium treats these as page-cancellable, unlike the truly reserved combos
  * (Ctrl+T, Ctrl+W, Ctrl+N) a webview never receives anyway.
  */

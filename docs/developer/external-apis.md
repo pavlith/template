@@ -1,3 +1,5 @@
+> This guide refers to the earlier desktop implementation. See the [developer index](README.md) for current Wails commands and entry points.
+
 # External APIs
 
 This doc covers patterns for making HTTP requests and storing auth tokens in a

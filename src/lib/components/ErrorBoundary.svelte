@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Snippet } from 'svelte'
   import { Button } from '$lib/components/ui/button'
-  import { commands } from '$lib/tauri-bindings'
+  import { commands } from '$lib/wails-bindings'
   import { logger } from '$lib/logger'
   import { toast } from '$lib/stores/toast'
   import { t } from '$lib/i18n/t.svelte'

@@ -1,11 +1,10 @@
 <script lang="ts">
-  import { getTauriVersion } from '@tauri-apps/api/app'
   import { Button } from '$lib/components/ui/button'
   import { Label } from '$lib/components/ui/label'
   import { Separator } from '$lib/components/ui/separator'
   import { Switch } from '$lib/components/ui/switch'
   import PreferenceSelect from './PreferenceSelect.svelte'
-  import { commands, unwrapResult } from '$lib/tauri-bindings'
+  import { commands, unwrapResult } from '$lib/wails-bindings'
   import { toast } from '$lib/stores/toast'
   import { t } from '$lib/i18n/t.svelte'
   import { formatDiagnostics } from '$lib/diagnostics'
@@ -19,11 +18,11 @@
   // show where your own settings go; their values reset when the dialog closes.
   //
   // To make a preference persistent:
-  //   1. Add the field to `AppPreferences` in src-tauri/src/types.rs
-  //      (serde renames to camelCase, so `my_setting` -> `mySetting`).
+  //   1. Add the field to `AppPreferences` in storage.go
+  //      (use a camelCase JSON tag).
   //   2. Add it to `defaultPreferences()` and `sanitizePreferences()` in
   //      src/lib/stores/preferences-schema.ts.
-  //   3. Run `pnpm run rust:bindings` to regenerate src/lib/bindings.ts.
+  //   3. Run `pnpm bindings` to regenerate the TypeScript bindings.
   //   4. Read it with `getPreferences().mySetting` and write it with
   //      `setPreference('mySetting', value)` — that debounces the save for you.
   //      Use `setPreferenceImmediate()` instead when you need to know the write
@@ -50,10 +49,7 @@
 
   async function copyDiagnostics(): Promise<void> {
     try {
-      const tauriVersion = await getTauriVersion()
-      const report = unwrapResult(
-        await commands.collectDiagnostics(tauriVersion),
-      )
+      const report = unwrapResult(await commands.collectDiagnostics())
       const text = formatDiagnostics(report)
       await navigator.clipboard.writeText(text)
       toast.success(t('preferences.advanced.diagnosticsCopied'))

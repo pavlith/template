@@ -8,7 +8,7 @@
    *
    * Two details here are load-bearing and easy to lose when copied by hand:
    *
-   * - `data-tauri-drag-region` sits on the bar only, NOT on the title
+   * - `data-window-drag` sits on the bar only, NOT on the title
    *   overlay. The overlay is `pointer-events-none`, so clicks fall through
    *   to the bar and dragging works without it. Marking the overlay too
    *   would break the leading cluster: native drag regions (`app-region` in
@@ -39,7 +39,7 @@
 </script>
 
 <div
-  data-tauri-drag-region
+  data-window-drag
   class="bg-background relative flex h-8 w-full shrink-0 items-center justify-between border-b"
 >
   {#if leading}

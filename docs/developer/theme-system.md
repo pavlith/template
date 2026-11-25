@@ -1,3 +1,5 @@
+> This guide refers to the earlier desktop implementation. See the [developer index](README.md) for current Wails commands and entry points.
+
 # Theme System
 
 A port of sarde-studio's theme system. Any VS Code theme JSON can become a

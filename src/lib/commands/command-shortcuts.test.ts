@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { mockIPC } from '@tauri-apps/api/mocks'
+import { mockIPC } from '$lib/../test/ipc'
 
 vi.mock('$lib/logger', () => ({
   warn: vi.fn(),
   logger: { warn: vi.fn(), error: vi.fn() },
 }))
-// The real menu module drags in @tauri-apps/api/menu; the only contract used
+// The real menu module drags in the native menu bindings; the only contract used
 // here is "a rebind triggers a rebuild".
 vi.mock('$lib/menu', () => ({ rebuildMenu: vi.fn(() => Promise.resolve()) }))
 

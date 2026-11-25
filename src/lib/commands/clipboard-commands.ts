@@ -1,4 +1,4 @@
-import { readText, writeText } from '@tauri-apps/plugin-clipboard-manager'
+import { Clipboard } from '@wailsio/runtime'
 import { toast } from '$lib/stores/toast'
 import { t } from '$lib/i18n/t.svelte'
 import { logger } from '$lib/logger'
@@ -7,11 +7,11 @@ import { registerCommands, type AppCommand } from './registry.svelte'
 export const DEMO_COPY_TO_CLIPBOARD = 'demo-copy-to-clipboard'
 export const DEMO_PASTE_FROM_CLIPBOARD = 'demo-paste-from-clipboard'
 
-/** Demo for tauri-plugin-clipboard-manager. */
+/** Demo for the Wails clipboard API. */
 async function copyDemoText(): Promise<void> {
   const text = t('demo.clipboardPayload')
   try {
-    await writeText(text)
+    await Clipboard.SetText(text)
     toast.success(t('demo.clipboardCopied'), { description: text })
   } catch (e) {
     logger.error('Clipboard write failed', e)
@@ -21,7 +21,7 @@ async function copyDemoText(): Promise<void> {
 
 async function readClipboard(): Promise<void> {
   try {
-    const text = await readText()
+    const text = await Clipboard.Text()
     if (text) {
       toast.info(t('demo.clipboardRead'), { description: text })
     } else {

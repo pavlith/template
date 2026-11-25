@@ -84,20 +84,20 @@ export function buildCombo(e: KeyboardEvent): string {
   return [...modifiers, key].join('+')
 }
 
-const TAURI_MODIFIER_MAP: Record<ShortcutModifier, string> = {
+const NATIVE_MODIFIER_MAP: Record<ShortcutModifier, string> = {
   mod: 'CmdOrCtrl',
   shift: 'Shift',
   alt: 'Alt',
 }
 
-export function toTauriAccelerator(normalized: string): string {
+export function toNativeAccelerator(normalized: string): string {
   const { key, modifiers } = parseShortcut(normalized)
-  const parts = modifiers.map((m) => TAURI_MODIFIER_MAP[m])
+  const parts = modifiers.map((m) => NATIVE_MODIFIER_MAP[m])
   parts.push(key.length === 1 ? key.toUpperCase() : key)
   return parts.join('+')
 }
 
-const TAURI_MODIFIER_ALIASES: Record<string, ShortcutModifier> = {
+const NATIVE_MODIFIER_ALIASES: Record<string, ShortcutModifier> = {
   cmdorctrl: 'mod',
   commandorcontrol: 'mod',
   cmd: 'mod',
@@ -113,19 +113,19 @@ const TAURI_MODIFIER_ALIASES: Record<string, ShortcutModifier> = {
 }
 
 /**
- * Inverse of {@link toTauriAccelerator}.
+ * Inverse of {@link toNativeAccelerator}.
  *
- * Global shortcuts are stored as Tauri accelerators ("CmdOrCtrl+Shift+K") so
- * the Rust startup path can register them without parsing. This converts one
+ * Global shortcuts are stored as native accelerators ("CmdOrCtrl+Shift+K") so
+ * the Go startup path can register them without parsing. This converts one
  * back for display via `formatShortcut()`.
  */
-export function fromTauriAccelerator(accelerator: string): ParsedShortcut {
+export function fromNativeAccelerator(accelerator: string): ParsedShortcut {
   const modifiers: ShortcutModifier[] = []
   let key = ''
 
   for (const part of accelerator.split('+').map((p) => p.trim())) {
     if (!part) continue
-    const alias = TAURI_MODIFIER_ALIASES[part.toLowerCase()]
+    const alias = NATIVE_MODIFIER_ALIASES[part.toLowerCase()]
     if (alias) {
       if (!modifiers.includes(alias)) modifiers.push(alias)
     } else {

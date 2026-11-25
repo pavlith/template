@@ -1,10 +1,8 @@
 {
-  "path": ["src", "src-tauri/src"],
+  "path": ["src"],
   "ignore": [
     "**/node_modules/**",
-    "**/target/**",
     "src/lib/components/ui/**",
-    "src/lib/bindings.ts",
     "src/lib/theme/vscode-themes/**",
     "src/lib/theme/vscode-catalog-index.ts",
     "src/lib/theme/builtin-presets.ts",

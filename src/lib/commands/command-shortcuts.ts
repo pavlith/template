@@ -1,5 +1,5 @@
 import { getPreferences, setPreference } from '$lib/stores/preferences.svelte'
-import { fromTauriAccelerator } from '$lib/shortcuts'
+import { fromNativeAccelerator } from '$lib/shortcuts'
 import { rebuildMenu } from '$lib/menu'
 import {
   getCommand,
@@ -54,7 +54,7 @@ export function findShortcutConflict(
   ]
   for (const [purpose, accelerator] of globals) {
     if (!accelerator) continue
-    const { key, modifiers } = fromTauriAccelerator(accelerator)
+    const { key, modifiers } = fromNativeAccelerator(accelerator)
     if ([...modifiers, key].join('+') === combo) {
       return { kind: 'global', purpose }
     }
